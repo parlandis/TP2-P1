@@ -1,8 +1,12 @@
 package simulator.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+
+import org.json.JSONObject;
 
 public class RegionManager implements AnimalMapView {
 	private int cols;
@@ -17,8 +21,78 @@ public class RegionManager implements AnimalMapView {
 		this.rows = rows;
 		this.width = width;
 		this.height = height;
-		this.regions = new Region[rows][cols](DefaultRegion);
-		regions = Array.
+		this.regions = new Region[rows][cols];
+		this.animalRegion = new HashMap<>();
+		
+	}
+	
+	protected void setRegion(int row, int col, Region r) {
+		this.regions[row][col] = r;
+		
+		List<Animal> listaA = this.regions[row][col].getAnimals();
+		while(!listaA.isEmpty()) {
+			Animal a = listaA.getFirst();
+			animalRegion.put(a, r);
+			updateAnimalRegion(a);
+			listaA.removeFirst();
+		}
+	}
+	
+	protected void registerAnimal(Animal a) {  // TODO: No entiendo lo de la posicion 
+
+	}
+	
+	protected void unregisterAnimal(Animal a) {
+		Region r = animalRegion.get(a);
+		r.removeAnimal(a);
+	}
+	
+	protected void updateAnimalRegion(Animal a) {
+		
+	}
+	
+	@Override
+	public double getFood(AnimalInfo a, double dt) {
+		return animalRegion.get(a).getFood(a, dt);
+	}
+	
+
+	protected void updateAllRegions(double dt) {
+		for(int i = 0; i < this.rows; i++) {
+			for(int j = 0; j < this.cols; j++) {
+				regions[i][j].update(dt);
+			}
+		}
+	}
+	
+	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter){  // TODO: tienen que ser de la misma region??
+		List<Animal> inRange = new ArrayList<>();
+		
+		for(int i = 0; i < this.rows; i++) {
+			for(int j = 0; j < this.cols; j++) {
+				List<Animal> animals = regions[i][j].getAnimals();
+				for(Animal animal : animals) {
+					if(animal.getPosition().distanceTo(a.getPosition()) <= a.getSightRange() && filter.test(animal)) {
+						inRange.add(animal);
+					}
+				}
+			}
+		}
+		
+		return null;	
+	}
+	
+	public JSONObject asJSON() {
+		return null;
+		
+	}
+	
+	private void initRegs() {
+		for(int i = 0; i < this.rows; i++) {
+			for(int j = 0; j < this.cols; j++) {
+				regions[i][j] = new DefaultRegion();
+			}
+		}
 	}
 	
 	@Override
@@ -33,13 +107,11 @@ public class RegionManager implements AnimalMapView {
 
 	@Override
 	public int getWidth() {
-		// TODO Auto-generated method stub
 		return width;
 	}
 
 	@Override
 	public int getHeight() {
-		// TODO Auto-generated method stub
 		return height;
 	}
 
@@ -55,17 +127,6 @@ public class RegionManager implements AnimalMapView {
 		return 0;
 	}
 
-	@Override
-	public double getFood(AnimalInfo a, double dt) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
-	@Override
-	public List<Animal> getAnimalsInRange(Animal e, Predicate<Animal> filter) {
-		// TODO Auto-generated method stub
-		
-		return null;
-	}
 
 }

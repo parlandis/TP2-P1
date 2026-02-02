@@ -6,7 +6,7 @@ import java.util.List;
 import org.json.JSONObject;
 
 public class Region implements Entity, FoodSupplier, RegionInfo {
-	List<Animal> animales;
+	private List<Animal> animales;
 	protected int nH;
 	protected int nC;
 	

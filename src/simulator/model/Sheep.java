@@ -1,5 +1,6 @@
 package simulator.model;
 
+import simulator.misc.Utils;
 import simulator.misc.Vector2D;
 
 public class Sheep extends Animal {
@@ -8,54 +9,88 @@ public class Sheep extends Animal {
 	
 	
 	public Sheep(SelectionStrategy mateStrategy, SelectionStrategy dangerStrategy,  Vector2D pos) {
-		super("sheep", Diet.HERBIVORE,40.0, 35.0, mateStrategy, pos);
+		super(Constantes .SHEEP_GENETIC_CODE, Diet.HERBIVORE,Constantes.INIT_SIGHT_SHEEP, Constantes.INIT_SPEED_SHEEP, mateStrategy, pos);
 		this.dangerStrategy = dangerStrategy;
 		
 	}
 	public Sheep(Sheep p1, Animal p2) {
 		super(p1, p2);
-		dangerStrategy = p1.dangerStrategy;
-		dangerSource = null;
+		this.dangerStrategy = p1.dangerStrategy;
+		this.dangerSource = null;
 	}
 	
 	@Override
 	public void update(double dt) {
-		if(state == State.DEAD) return;
 		switch(state) {
+		//1
+		case State.DEAD:
+			return;
+		//2
 		case State.NORMAL:
-			setNormalStateAction();
+			doNormal(dt);
 			break;
 		case State.DANGER:
-			setDangerStateAction();
+			doDanger(dt);
 			break;
 		case State.HUNGER:
-			setHungerStateAction();
+			doHunger(dt);
 			break;
 		case State.MATE:
-			setMateStateAction();
+			doMate(dt);
 			break;
 		default:
 			return;
 		}
+		//3
+		double maxX = this.regionMngr.getWidth();
+		double maxY = this.regionMngr.getHeight();
+		
+		if(pos.getX() <= 0.0 || pos.getX() >= maxX || pos.getY() <= 0.0 || pos.getY() >= maxY) {
+            double validX = Utils.constrainValueInRange(pos.getX(), 0, maxX);
+            double validY = Utils.constrainValueInRange(pos.getY(), 0, maxY);
+            this.pos = new Vector2D(validX, validY);
+            
+           this.state = State.NORMAL;
+		}
+		//4
+		if(this.energy <= 0.0 || this.age >= Constantes.MAX_AGE_SHEEP) {
+			this.state = State.DEAD;
+		}
+		//5
+		if(this.state != State.DEAD) {
+			double food = this.regionMngr.getFood(this, dt);
+			this.energy += food;
+			if(this.energy > 100.0) this.energy = 100.0;
+			
+		}
+		
+		//TODO: faltan los demas pasos 
 	}
 	
 	
 	
 	private void doNormal(double dt) {        //TODO: mirar bien como funciona lo del normalStateAction
+		//1
 		Vector2D destination = this.getDestination();
+		//1.1
 		if(destination.distanceTo(this.getPosition()) < 8.0) {
-			destination = destination.get_random_vector();       // TODO: get new random destination
+			double x = Utils.RAND.nextDouble(0, this.regionMngr.getWidth());
+			double y = Utils.RAND.nextDouble(0, this.regionMngr.getHeight());
+			
+			destination = new Vector2D(x,y);       
 			this.dest = destination;
 		}
 		
-		
+		//1.2
 		move(speed*dt*Math.exp((energy-100.0)*0.007));
 		this.age += dt;
 		this.energy -= 20.0*dt;
 		this.desire += 40.0 *dt;
 		
+		//2
+		//2.1
 		if(dangerSource == null) {  //TODO: Falta implementar las estrategias
-			
+			dangerSource = SelectionStrategy.select(dangerSource, this.regionMngr.getAnimalsInRange(this, Diet.CARNIVORE));
 		}
 		
 		if(dangerSource != null) {
@@ -112,8 +147,8 @@ public class Sheep extends Animal {
 			
 		}
 	}
-	@Override
-	protected void setHungerStateAction() {
+
+	protected void doHunger(double dt) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -163,16 +198,21 @@ public class Sheep extends Animal {
 	}
 	@Override
 	protected void setNormalStateAction() {
-		// TODO Auto-generated method stub
+		this.dangerSource = null;
+		this.mateTarget = null;
 		
 	}
 	@Override
 	protected void setMateStateAction() {
-		// TODO Auto-generated method stub
+		this.dangerSource = null;
 		
 	}
 	@Override
 	protected void setDangerStateAction() {
+		this.mateTarget = null;
+	}
+	@Override
+	protected void setHungerStateAction() {
 		// TODO Auto-generated method stub
 		
 	}
