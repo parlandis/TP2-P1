@@ -1,5 +1,7 @@
 package simulator.model;
 
+import java.util.function.Predicate;
+
 import simulator.misc.Utils;
 import simulator.misc.Vector2D;
 
@@ -90,7 +92,9 @@ public class Sheep extends Animal {
 		//2
 		//2.1
 		if(dangerSource == null) {  //TODO: Falta implementar las estrategias
-			dangerSource = SelectionStrategy.select(dangerSource, this.regionMngr.getAnimalsInRange(this, Diet.CARNIVORE));
+
+			
+			dangerSource = SelectionStrategy.select(dangerSource, this.regionMngr.getAnimalsInRange(this, ));
 		}
 		
 		if(dangerSource != null) {

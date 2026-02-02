@@ -20,7 +20,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 	protected double sightRange;
 	protected Animal mateTarget;
 	protected Animal baby;
-	protected RegionManager regionMngr; //TODO: Pome que es AnimalMapView pero no tiene sentido, tiene que ser RegionManager
+	protected AnimalMapView regionMngr; 
 	protected SelectionStrategy mateStrategy;
 	
 	
@@ -57,18 +57,18 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.geneticCode = p1.getGeneticCode();
 		this.diet = p1.getDiet();
 		this.mateStrategy = p2.mateStrategy;
-		this.pos = p1.getPosition().plus(Vector2D.get_random_vector(-1,1).scale(60.0*(Utils.RAND.nextGaussian()+1))); //TODO: Cambiar a VECTOR2D o no se como se hace si no
+		this.pos = p1.getPosition().plus(Vector2D.get_random_vector(-1,1).scale(60.0*(Utils.RAND.nextGaussian()+1)));
 		this.sightRange = Utils.getRandomizedParameter((p1.getSightRange()+p2.getSightRange())/2, 0.2);
 		this.speed = Utils.getRandomizedParameter((p1.getSpeed()+p2.getSpeed())/2, 0.2);
 	}
 	
-	private void init(RegionManager regMngr) {  //TODO: Pome que es AnimalMapView pero no tiene sentido, tiene que ser RegionManager
+	private void init(AnimalMapView regMngr) { 
 		
 		this.regionMngr = regMngr;
 		double x;
 		double y;
 		
-		if(pos == null) {                     // TODO: Hacer primero la clase regionMngr
+		if(pos == null) { 
 			x = Utils.RAND.nextDouble(0, regMngr.getWidth());
 			y = Utils.RAND.nextDouble(0, regMngr.getHeight());
 			this.pos = new Vector2D(x, y);
@@ -83,10 +83,11 @@ public abstract class Animal implements Entity, AnimalInfo {
 	@Override
 	public void update(double dt) {
 		
+		
 	}
 
 	
-	private Animal deliverBaby() {   // TODO: Haver que nazca el Bebe
+	protected Animal deliverBaby() {   
 		Animal bebe = this.baby;
 		this.baby = null;
 		return bebe;

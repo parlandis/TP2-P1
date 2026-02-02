@@ -9,12 +9,14 @@ import java.util.function.Predicate;
 import org.json.JSONObject;
 
 public class RegionManager implements AnimalMapView {
-	private int cols;
-	private int rows;
-	private int width;
-	private int height;
-	private Map<Animal, Region> animalRegion;
-	private Region[][] regions;
+	protected int cols;
+	protected int rows;
+	protected int width;
+	protected int height;
+	private int regWidth;
+	private int regHeight;
+	protected Map<Animal, Region> animalRegion;
+	protected Region[][] regions;
 	
 	public RegionManager(int cols, int rows, int width, int height) {
 		this.cols = cols;
@@ -23,7 +25,8 @@ public class RegionManager implements AnimalMapView {
 		this.height = height;
 		this.regions = new Region[rows][cols];
 		this.animalRegion = new HashMap<>();
-		
+		this.regHeight = height / rows;
+		this.regWidth = width / cols;
 	}
 	
 	protected void setRegion(int row, int col, Region r) {
@@ -38,8 +41,13 @@ public class RegionManager implements AnimalMapView {
 		}
 	}
 	
-	protected void registerAnimal(Animal a) {  // TODO: No entiendo lo de la posicion 
-
+	protected void registerAnimal(Animal a) {  
+		int c = (int) (a.getPosition().getX() / this.regWidth);  
+		int r = (int) (a.getPosition().getY() / this.regHeight); 
+		Region reg = regions[r][c];
+		animalRegion.put(a, reg);
+		
+		this.updateAnimalRegion(a);
 	}
 	
 	protected void unregisterAnimal(Animal a) {
@@ -117,14 +125,12 @@ public class RegionManager implements AnimalMapView {
 
 	@Override
 	public int getRegionWidth() {
-		// TODO Auto-generated method stub
-		return 0;
+		return regWidth;
 	}
 
 	@Override
 	public int getRegionHeight() {
-		// TODO Auto-generated method stub
-		return 0;
+		return regHeight;
 	}
 
 
