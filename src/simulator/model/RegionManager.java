@@ -56,7 +56,9 @@ public class RegionManager implements AnimalMapView {
 	}
 	
 	protected void updateAnimalRegion(Animal a) {
-		
+		Region actual = animalRegion.get(a);
+
+		actual.
 	}
 	
 	@Override
