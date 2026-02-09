@@ -1,5 +1,6 @@
 package simulator.model;
 
+import simulator.misc.Utils;
 import simulator.misc.Vector2D;
 
 public class Wolf extends Animal  {
@@ -25,22 +26,43 @@ public class Wolf extends Animal  {
 	
 	@Override
 	public void update(double dt) {
-		if(state == State.DEAD) return;
 		switch(state) {
+		//1
+		case State.DEAD:
+			return;
+		//2
 		case State.NORMAL:
 			doNormal(dt);
 			break;
-		case State.HUNGER:
+		case State.DANGER:
 			doHunger(dt);
-			break;
-		case State.MATE:
-			doMate(dt);
 			break;
 		default:
 			return;
 		}
+		//3
+		double maxX = this.regionMngr.getWidth();
+		double maxY = this.regionMngr.getHeight();
 		
-		if(pos.)
+		if(pos.getX() <= 0.0 || pos.getX() >= maxX || pos.getY() <= 0.0 || pos.getY() >= maxY) {
+            double validX = Utils.constrainValueInRange(pos.getX(), 0, maxX);
+            double validY = Utils.constrainValueInRange(pos.getY(), 0, maxY);
+            this.pos = new Vector2D(validX, validY);
+            
+           this.state = State.NORMAL;
+		}
+		//4
+		if(this.energy <= 0.0 || this.age >= Constantes.MAX_AGE_WOLF) {
+			this.state = State.DEAD;
+		}
+		//5
+		if(this.state != State.DEAD) {
+			double food = this.regionMngr.getFood(this, dt);
+			this.energy += food;
+			if(this.energy > 100.0) this.energy = 100.0;
+			
+		}
+		
 	}
 
 

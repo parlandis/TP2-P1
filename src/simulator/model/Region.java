@@ -3,7 +3,10 @@ package simulator.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+
 
 public class Region implements Entity, FoodSupplier, RegionInfo {
 	private List<Animal> animales;
@@ -31,7 +34,15 @@ public class Region implements Entity, FoodSupplier, RegionInfo {
 	}
 	
 	public JSONObject asJSON() {
-		return null;
+		JSONObject reg = new JSONObject();
+		JSONArray JsAnimales = new JSONArray();
+		
+		for(Animal a : this.animales) {
+			JsAnimales.put(a.asJSON());
+		}
+		
+		reg.put("animals", JsAnimales);
+		return reg;
 	}
 
 	@Override
@@ -45,5 +56,6 @@ public class Region implements Entity, FoodSupplier, RegionInfo {
 
 		
 	}
+	
 
 }

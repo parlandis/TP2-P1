@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import simulator.misc.Vector2D;
 
 public class RegionManager implements AnimalMapView {
 	protected int cols;
@@ -27,6 +30,7 @@ public class RegionManager implements AnimalMapView {
 		this.animalRegion = new HashMap<>();
 		this.regHeight = height / rows;
 		this.regWidth = width / cols;
+		this.initRegs();
 	}
 	
 	protected void setRegion(int row, int col, Region r) {
@@ -42,8 +46,8 @@ public class RegionManager implements AnimalMapView {
 	}
 	
 	protected void registerAnimal(Animal a) {  
-		int c = (int) (a.getPosition().getX() / this.regWidth);  
-		int r = (int) (a.getPosition().getY() / this.regHeight); 
+		int c = (int) (a.getPosition().getX() / this.regWidth);   //TODO: No se si hay que usar casteos 
+		int r = (int) (a.getPosition().getY() / this.regHeight);  
 		Region reg = regions[r][c];
 		animalRegion.put(a, reg);
 		
@@ -55,10 +59,25 @@ public class RegionManager implements AnimalMapView {
 		r.removeAnimal(a);
 	}
 	
-	protected void updateAnimalRegion(Animal a) {
-		Region actual = animalRegion.get(a);
+	private Region regionByPosition(Animal a) {// Devolvemos la Region a la que pertenece el animal segun su regiopn
+		// Pos del animal 
+		int c = (int) (a.getPosition().getX() / this.regWidth);   //TODO: No se si hay que usar casteos 
+		int r = (int) (a.getPosition().getY() / this.regHeight);  
+		Region reg = regions[c][r];
+		return reg;
+		
+	}
 
-		actual.
+	
+	protected void updateAnimalRegion(Animal a) { 
+		Region actual = animalRegion.get(a); 
+		Region region = regionByPosition(a);
+		if(actual != region) {  // Comprobamos que el animal se ha o no movido de region
+			 region.addAnimal(a);
+			 actual.removeAnimal(a);
+			 animalRegion.put(a, region);
+		}
+		
 	}
 	
 	@Override
@@ -75,26 +94,40 @@ public class RegionManager implements AnimalMapView {
 		}
 	}
 	
-	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter){  // TODO: tienen que ser de la misma region??
+	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter){
 		List<Animal> inRange = new ArrayList<>();
 		
 		for(int i = 0; i < this.rows; i++) {
 			for(int j = 0; j < this.cols; j++) {
 				List<Animal> animals = regions[i][j].getAnimals();
 				for(Animal animal : animals) {
-					if(animal.getPosition().distanceTo(a.getPosition()) <= a.getSightRange() && filter.test(animal)) {
+					if(animal.getPosition().distanceTo(a.getPosition()) <= a.getSightRange() && filter.test(animal) && !animal.equals(a)) {
 						inRange.add(animal);
 					}
 				}
 			}
 		}
 		
-		return null;	
+		return inRange;	
 	}
 	
 	public JSONObject asJSON() {
-		return null;
+		JSONObject jo = new JSONObject();
+		JSONArray JsRegiones = new JSONArray();
 		
+		for(int i = 0; i < this.rows; i++) {
+			for(int j = 0; j < this.cols; j++) {
+				 JSONObject r = new JSONObject();
+				 r.put("row", i);
+				 r.put("col", j);
+				 JSONObject reg = this.regions[i][j].asJSON();
+				 r.put("data", reg);
+				 JsRegiones.put(r);
+			}
+		}
+		
+		jo.put("regions", JsRegiones);
+		return jo;
 	}
 	
 	private void initRegs() {

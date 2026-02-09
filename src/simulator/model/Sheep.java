@@ -11,7 +11,7 @@ public class Sheep extends Animal {
 	
 	
 	public Sheep(SelectionStrategy mateStrategy, SelectionStrategy dangerStrategy,  Vector2D pos) {
-		super(Constantes .SHEEP_GENETIC_CODE, Diet.HERBIVORE,Constantes.INIT_SIGHT_SHEEP, Constantes.INIT_SPEED_SHEEP, mateStrategy, pos);
+		super(Constantes.SHEEP_GENETIC_CODE, Diet.HERBIVORE,Constantes.INIT_SIGHT_SHEEP, Constantes.INIT_SPEED_SHEEP, mateStrategy, pos);
 		this.dangerStrategy = dangerStrategy;
 		
 	}
@@ -65,8 +65,7 @@ public class Sheep extends Animal {
 			if(this.energy > 100.0) this.energy = 100.0;
 			
 		}
-		
-		//TODO: faltan los demas pasos 
+
 	}
 	
 	
@@ -94,7 +93,8 @@ public class Sheep extends Animal {
 		if(dangerSource == null) {  //TODO: Falta implementar las estrategias
 
 			
-			dangerSource = SelectionStrategy.select(dangerSource, this.regionMngr.getAnimalsInRange(this, ));
+			dangerSource = dangerStrategy.select(dangerSource, this.regionMngr.getAnimalsInRange(this, a ->a.getDiet() == Diet.CARNIVORE ));
+			
 		}
 		
 		if(dangerSource != null) {
@@ -115,7 +115,7 @@ public class Sheep extends Animal {
 		}
 		//2)
 		if(mateTarget == null) {  
-			mateTarget =      ;   //TODO: falta la estrategia 
+			mateTarget =  this.mateStrategy.select(this.mateTarget, this.regionMngr.getAnimalsInRange(this, a -> a.geneticCode == Constantes.SHEEP_GENETIC_CODE));
 			if(mateTarget == null) {
 				move(speed*dt*Math.exp((energy-100.0)*0.007));
 			}
@@ -145,7 +145,7 @@ public class Sheep extends Animal {
 		}
 		//3)
 		if(dangerSource == null) {
-			dangerSource =    ; // no hay 
+			dangerSource = dangerStrategy.select(dangerSource, this.regionMngr.getAnimalsInRange(this, a ->a.getDiet() == Diet.CARNIVORE ));	
 		}
 		if(dangerSource == null) {
 			
@@ -181,7 +181,8 @@ public class Sheep extends Animal {
 		//3)
 		if(dangerSource == null || dangerSource.getPosition().distanceTo(pos) > this.sightRange) {
 			//3.1)
-			dangerSource =     ;// TODO: Implementar la estrategia
+			dangerSource = dangerStrategy.select(dangerSource, this.regionMngr.getAnimalsInRange(this, a ->a.getDiet() == Diet.CARNIVORE ));
+			
 			//3.1.b) 
 			if(dangerSource == null) {
 				//3.1.b.a) 

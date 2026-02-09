@@ -58,7 +58,12 @@ public class Simulator implements JSONable{
 		//1
 		this.time += dt;
 		//2
-		
+		for(Animal animal : listaA) {
+			if(animal.getState() == State.DEAD ) {
+				reMng.unregisterAnimal(animal);
+				listaA.remove(animal);
+			}
+		}
 		
 		//3
 		for(Animal animal : listaA) {
@@ -78,6 +83,11 @@ public class Simulator implements JSONable{
 	}
 	
 	public JSONObject asJSON() {
+		JSONObject jo = new JSONObject();
+		jo.put("time", this.time);
+		JSONObject s = this.reMng.asJSON();
+		jo.put("state", s);
 		
+		return jo;
 	}
 }

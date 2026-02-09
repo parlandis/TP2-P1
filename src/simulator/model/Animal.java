@@ -44,6 +44,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.mateTarget = null;
 		this.baby = null;
 		this.regionMngr = null;
+		init(regionMngr);
 	}
 	
 	protected Animal(Animal p1, Animal p2) {
@@ -123,7 +124,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 		JSONObject obj = new JSONObject();
 	    
 		obj.put("pos", pos.asJSONArray());
-		obj.put("geneticCode", geneticCode);
+		obj.put("gcode", geneticCode);
 		obj.put("diet", diet.toString());
 		obj.put("state", state.toString());
 		obj.put("energy", energy);
@@ -190,6 +191,10 @@ public abstract class Animal implements Entity, AnimalInfo {
 	@Override
 	public boolean isPregnant() {
 		return this.baby != null;
+	}
+	
+	protected boolean isDead() {
+		return this.isDead();
 	}
 
 
