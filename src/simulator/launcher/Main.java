@@ -3,6 +3,9 @@ package simulator.launcher;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -13,7 +16,20 @@ import org.apache.commons.cli.ParseException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import simulator.*;
+import simulator.factories.Builder;
+import simulator.factories.BuilderBasedFactory;
+import simulator.factories.DefaultRegionBuilder;
+import simulator.factories.DynamicSupplyRegionBuilder;
+import simulator.factories.Factory;
+import simulator.factories.SelectClosestBuilder;
+import simulator.factories.SelectFirstBuilder;
+import simulator.factories.SheepBuilder;
+import simulator.factories.WolfBuilder;
 import simulator.misc.Utils;
+import simulator.model.Animal;
+import simulator.model.Region;
+import simulator.model.SelectionStrategy;
 
 public class Main {
 
@@ -46,6 +62,9 @@ public class Main {
 	private static Double time = null;
 	private static String inFile = null;
 	private static ExecMode mode = ExecMode.BATCH;
+	private static Factory<Animal> _animalFactory;
+	private static Factory<Region> _regionFactory;
+	private static Factory<SelectionStrategy> _strategyFactory;
 
 	private static void parseArgs(String[] args) {
 
@@ -124,6 +143,22 @@ public class Main {
 	}
 
 	private static void initFactories() {
+		// initialize the strategies factory  
+		List<Builder<SelectionStrategy>> selectionStrategyBuilders = new ArrayList<>();  
+		selectionStrategyBuilders.add(new SelectFirstBuilder());  
+		selectionStrategyBuilders.add(new SelectClosestBuilder());  
+		Factory<SelectionStrategy> selectionStrategyFactory = new BuilderBasedFactory<SelectionStrategy>(selectionStrategyBuilders);
+	
+		List<Builder<Animal>>animalsBuilders = new ArrayList<>();
+		animalsBuilders.add(new SheepBuilder(selectionStrategyFactory));
+		animalsBuilders.add(new WolfBuilder(selectionStrategyFactory));
+		Factory<Animal> animalsFactory = new BuilderBasedFactory<Animal>(animalsBuilders);
+		
+		List<Builder<Region>> regionsBuilder = new ArrayList<>();
+		regionsBuilder.add(new DefaultRegionBuilder());
+		regionsBuilder.add(new DynamicSupplyRegionBuilder());
+		Factory<Region> regionsFactory = new BuilderBasedFactory<Region>(regionsBuilder);
+	
 	}
 
 	private static JSONObject loadJSONFile(InputStream in) {

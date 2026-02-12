@@ -27,18 +27,20 @@ public class Simulator implements JSONable{
 	private void setRegion(int row, int col, Region r) {
 		reMng.setRegion(row, col, r);
 	}
-	//TODO: Usar despues cuando usemos Json
+
 	public void setRegion(int row, int col, JSONObject rJson) {
-		
+		Region r = regionsFactory.createInstance(rJson);
+		setRegion(row, col, r);
 	}
 	
-	private void addAnimal(Animal a) { // 
+	private void addAnimal(Animal a) { 
 		listaA.add(a);
 		this.reMng.registerAnimal(a);
 	}
 	
 	public void addAnimal(JSONObject aJson) {
-		
+		Animal a = animalsFactory.createInstance(aJson);
+		addAnimal(a);
 	}
 	
 	public MapInfo getMapInfo() {
