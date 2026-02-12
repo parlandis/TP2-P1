@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 
 public class Region implements Entity, FoodSupplier, RegionInfo {
-	private List<Animal> animales;
+	protected List<Animal> animales;
 	protected int nH;
 	protected int nC;
 	

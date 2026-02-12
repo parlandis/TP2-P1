@@ -87,7 +87,6 @@ public class Simulator implements JSONable{
 		jo.put("time", this.time);
 		JSONObject s = this.reMng.asJSON();
 		jo.put("state", s);
-		
 		return jo;
 	}
 }

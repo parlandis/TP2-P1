@@ -90,11 +90,8 @@ public class Sheep extends Animal {
 		
 		//2
 		//2.1
-		if(dangerSource == null) {  //TODO: Falta implementar las estrategias
-
-			
+		if(dangerSource == null) { 
 			dangerSource = dangerStrategy.select(dangerSource, this.regionMngr.getAnimalsInRange(this, a ->a.getDiet() == Diet.CARNIVORE ));
-			
 		}
 		
 		if(dangerSource != null) {
@@ -137,7 +134,9 @@ public class Sheep extends Animal {
 				mateTarget.desire = 0.0;
 				//2.6.b)
 				if(this.baby == null) {
-					this.baby = new Sheep(this, mateTarget); //TODO:NO entiendo lo de con probabilidad 0.9
+					if(Utils.RAND.nextDouble() < 0.9) {
+						this.baby = new Sheep(this, mateTarget);
+					}
 					mateTarget = null;
 				}
 				mateTarget = null;	

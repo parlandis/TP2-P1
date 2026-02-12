@@ -67,35 +67,6 @@ public class Wolf extends Animal  {
 
 
 
-	private void doMate(double dt) {
-
-	}
-
-
-
-	private void doHunger(double dt) {
-		//1 
-		if(huntTarget == null || huntTarget.getState().equals(State.DEAD) || huntTarget.getPosition().distanceTo(getPosition()) > 8.0) {
-			huntTarget = this.huntingStrategy.select(huntTarget, null)  ;
-		}
-		if(huntTarget == null) {
-			//1.1
-			if(getDestination().distanceTo(this.getPosition()) < 8.0) {
-				Vector2D destination = getRandomDestination();       // TODO: get new random destination
-				this.setDestination(destination);
-			}
-			//1.2
-			move(speed*dt*Math.exp((energy-100.0)*0.007));
-			this.age += dt;
-			this.energy -= 18.0*dt;
-			this.desire += 30.0 *dt;
-			if(energy < 0.0) energy = 0.0;
-			if(energy > 100.0) energy = 100.0;
-			if(desire < 0.0) desire = 0.0;
-			if(desire > 100.0) desire = 100.0;
-		}
-		
-	}
 
 
 
@@ -124,9 +95,109 @@ public class Wolf extends Animal  {
 		}	
 	}
 
+	private void doHunger(double dt) {
+		//1 
+		if(huntTarget == null || huntTarget.getState().equals(State.DEAD) || huntTarget.getPosition().distanceTo(getPosition()) > Constantes.INIT_SIGHT_WOLF) {
+			huntTarget = this.huntingStrategy.select(huntTarget, this.regionMngr.getAnimalsInRange(this, a ->a.getDiet() == Diet.HERBIVORE));  ;
+		}
+		if(huntTarget == null) {  //TODO: No entiendo como va lo de seguir el punto 1 
+			//1.1
+			Vector2D destination = this.getDestination();
+			if(destination.distanceTo(this.getPosition()) < 8.0) {
+				double x = Utils.RAND.nextDouble(0, this.regionMngr.getWidth());
+				double y = Utils.RAND.nextDouble(0, this.regionMngr.getHeight());
+				
+				destination = new Vector2D(x,y);       
+				this.dest = destination;
+			}
+			
+			//1.2
+			move(speed*dt*Math.exp((energy-100.0)*0.007));
+			this.age += dt;
+			this.energy -= 18.0*dt;
+			this.desire += 30.0 *dt;
+			if(energy < 0.0) energy = 0.0;
+			if(energy > 100.0) energy = 100.0;
+			if(desire < 0.0) desire = 0.0;
+			if(desire > 100.0) desire = 100.0;
+		}
+		else {
+			//2.1 
+			this.dest = huntTarget.getPosition();
+			move(3.0*speed*dt*Math.exp((energy-100.0)*0.007));
+			this.age += dt;
+			this.energy -= 18.0*1.2*dt;
+			this.desire += 30.0*dt;
+			if(energy < 0.0) energy = 0.0;
+			if(energy > 100.0) energy = 100.0;
+			if(desire < 0.0) desire = 0.0;
+			if(desire > 100.0) desire = 100.0;
+			
+			if(huntTarget.getPosition().distanceTo(this.getPosition()) < 8.0) {
+				huntTarget.setState(State.DEAD);
+				huntTarget = null;
+				this.energy += 50.0;
+				if(this.energy > 100.0) this.energy = 100.0;
+			}
+		}
+		//3
+		if(energy > 50.0) {
+			//3.2
+			if(desire > 65.0) {
+				setState(State.MATE);
+			}
+			else {
+				setState(State.NORMAL);
+			}
+		}
+	}
 
+	private void doMate(double dt) {
+		//1
+		if(this.mateTarget != null && (mateTarget.getState() == State.DEAD || mateTarget.getPosition().distanceTo(pos) > this.sightRange)) {
+			mateTarget = null;
+		}
+		//2
+		if(mateTarget == null) {
+			mateTarget =  this.mateStrategy.select(this.mateTarget, this.regionMngr.getAnimalsInRange(this, a -> a.geneticCode == Constantes.WOLF_GENETIC_CODE));
+			if(mateTarget == null) {
+				move(speed*dt*Math.exp((energy-100.0)*0.007));
+			}
+		}
+		else {
+			// 2.1)
+			this.dest = mateTarget.getPosition();
+			move(3.0*speed*dt*Math.exp((energy-100.0)*0.007));
+			this.age += dt;
+			this.energy -= 18.0*1.2*dt;
+			this.desire += 30.0*dt;
+			if(energy < 0.0) energy = 0.0;
+			if(energy > 100.0) energy = 100.0;
+			if(desire < 0.0) desire = 0.0;
+			if(desire > 100.0) desire = 100.0;
+			
+			if(this.pos.distanceTo(mateTarget.getPosition()) < 8.0) {
+				this.desire = 0.0;
+				mateTarget.desire = 0.0;
+				if(this.baby == null) { 
+					if(Utils.RAND.nextDouble() < 0.75) {
+						this.baby = new Wolf(this, mateTarget);
+					}
+				}
+				this.energy -= 10.0;
+				if(this.energy < 0.0) this.energy = 0.0;	
+				mateTarget = null;
+			}
+		}
+		if(this.energy < 50.0) {
+			setState(State.HUNGER);
+		}
+		 else if(this.desire < 65.0) {
+			 setState(State.NORMAL);
+		 }	
+	}
 
-	@Override
+	@Override  // TODO: No entiendo como va lo de los estados, si es que hay que hacer algo en cada uno o no
 	protected void setNormalStateAction() {
 		// TODO Auto-generated method stub
 		
