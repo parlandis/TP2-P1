@@ -49,7 +49,9 @@ public class RegionManager implements AnimalMapView {
 		int c = (int) (a.getPosition().getX() / this.regWidth);   //TODO: No se si hay que usar casteos 
 		int r = (int) (a.getPosition().getY() / this.regHeight);  
 		Region reg = regions[r][c];
+		a.init(this);
 		animalRegion.put(a, reg);
+		reg.addAnimal(a);
 		
 		this.updateAnimalRegion(a);
 	}

@@ -24,6 +24,7 @@ import simulator.factories.DynamicSupplyRegionBuilder;
 import simulator.factories.Factory;
 import simulator.factories.SelectClosestBuilder;
 import simulator.factories.SelectFirstBuilder;
+import simulator.factories.SelectYoungestBuilder;
 import simulator.factories.SheepBuilder;
 import simulator.factories.WolfBuilder;
 import simulator.misc.Utils;
@@ -32,6 +33,11 @@ import simulator.model.Region;
 import simulator.model.SelectionStrategy;
 
 public class Main {
+	
+	private static Factory<Animal> animalFactory;
+	private static Factory<Region> regionFactory;
+	private static Factory<SelectionStrategy> strategyFactory;
+	
 
 	private enum ExecMode {
 		BATCH("batch", "Batch mode"), GUI("gui", "Graphical User Interface mode");
@@ -147,6 +153,7 @@ public class Main {
 		List<Builder<SelectionStrategy>> selectionStrategyBuilders = new ArrayList<>();  
 		selectionStrategyBuilders.add(new SelectFirstBuilder());  
 		selectionStrategyBuilders.add(new SelectClosestBuilder());  
+
 		Factory<SelectionStrategy> selectionStrategyFactory = new BuilderBasedFactory<SelectionStrategy>(selectionStrategyBuilders);
 	
 		List<Builder<Animal>>animalsBuilders = new ArrayList<>();
@@ -190,6 +197,15 @@ public class Main {
 	public static void main(String[] args) {
 		Utils.RAND.setSeed(2147483647l);
 		try {
+			//TODO: PRUEBA SIN JSON
+			int cols = 3;
+			int rows = 3;
+			int width = 800;
+			
+			
+			
+			
+			
 			start(args);
 		} catch (Exception e) {
 			System.err.println("Something went wrong ...");

@@ -35,7 +35,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.sightRange = sightRange;
 		this.speed = Utils.getRandomizedParameter(initSpeed, 0.1);
 		this.mateStrategy = mateStrategy;
-		this.pos = null;  
+		this.pos = pos;  
 		this.state = State.NORMAL;
 		this.energy = 100.0;
 		this.age = 0.0; 
@@ -43,15 +43,15 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.dest = null;
 		this.mateTarget = null;
 		this.baby = null;
-		this.regionMngr = null;
-		init(regionMngr);
+		//this.regionMngr = null;
+		//init(regionMngr);
 	}
 	
 	protected Animal(Animal p1, Animal p2) {
 		this.dest = null;
 		this.baby = null;
 		this.mateTarget = null;
-		this.regionMngr = null;
+		//this.regionMngr = null;
 		this.state = State.NORMAL;
 		this.energy = (p1.getEnergy() + p2.getEnergy()) /2; 
 		this.age = 0.0;
@@ -64,7 +64,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.speed = Utils.getRandomizedParameter((p1.getSpeed()+p2.getSpeed())/2, 0.2);
 	}
 	
-	private void init(AnimalMapView regMngr) { 
+	protected void init(AnimalMapView regMngr) { 
 		
 		this.regionMngr = regMngr;
 		double x;

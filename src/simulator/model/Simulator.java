@@ -1,5 +1,6 @@
 package simulator.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -15,12 +16,10 @@ public class Simulator implements JSONable{
 	double time;
 	
 	public Simulator(int cols, int rows, int width, int height, Factory<Animal> animalsFactory, Factory<Region> regionsFactory) {
-		reMng.cols = cols;
-		reMng.rows = rows;
-		reMng.width = width;
-		reMng.height = height;
+		this.reMng = new RegionManager(cols, rows, width, height);
 		this.animalsFactory = animalsFactory;
 		this.regionsFactory = regionsFactory;
+		listaA = new ArrayList<>();
 		this.time = 0.0;
 	}
 	
@@ -34,8 +33,10 @@ public class Simulator implements JSONable{
 	}
 	
 	private void addAnimal(Animal a) { 
-		listaA.add(a);
+
+
 		this.reMng.registerAnimal(a);
+		listaA.add(a);
 	}
 	
 	public void addAnimal(JSONObject aJson) {
@@ -91,4 +92,32 @@ public class Simulator implements JSONable{
 		jo.put("state", s);
 		return jo;
 	}
+	
+	
+	
+	public static void main(String[] args) {
+		
+		Simulator sim = new Simulator(1,1,100,100,null,null);
+		Vector2D pos = new Vector2D(50.0,50.0);
+		
+		
+		Animal oveja = new Sheep(new SelectFirst(), new SelectClosest(), pos);
+		
+		sim.addAnimal(oveja);
+		
+		while(!sim.listaA.isEmpty()) {
+			
+		
+		
+		System.out.println("Simulador con una oveja");
+		System.out.println("Estado INicial: "+ sim.asJSON());
+		
+		sim.advance(0.03);
+		
+		System.out.println("Estado Final:" + sim.asJSON());
+		}
+		
+	}
+	
+	
 }
