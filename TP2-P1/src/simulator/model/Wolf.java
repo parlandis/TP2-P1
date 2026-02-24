@@ -9,7 +9,7 @@ public class Wolf extends Animal {
 	final static double INIT_SIGHT_WOLF = 50.0;
 	final static double INIT_SPEED_WOLF = 60.0;
 	final static double BOOST_FACTOR_WOLF = 3.0;
-	final static double MAX_AGE_WOLF = 14.0;
+	final static double MAX_AGE_WOLF = 8.0;
 	final static double FOOD_THRESHOLD_WOLF = 50.0;
 	final static double FOOD_DROP_BOOST_FACTOR_WOLF = 1.2;
 	final static double FOOD_DROP_RATE_WOLF = 18.0;

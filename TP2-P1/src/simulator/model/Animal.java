@@ -45,7 +45,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.mateStrategy = mateStrategy;
 		this.pos = pos;
 		this.state = State.NORMAL;
-		this.energy = Constantes.INIT_ENERGY;
+		this.energy = INIT_ENERGY;
 		this.age = 0.0;
 		this.desire = 0.0;
 		this.dest = null;
@@ -68,10 +68,10 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.diet = p1.getDiet();
 		this.mateStrategy = p2.mateStrategy;
 		this.pos = p1.getPosition().plus(
-				Vector2D.get_random_vector(-1, 1).scale(Constantes.NEARBY_FACTOR * (Utils.RAND.nextGaussian() + 1)));
+				Vector2D.get_random_vector(-1, 1).scale(NEARBY_FACTOR * (Utils.RAND.nextGaussian() + 1)));
 		this.sightRange = Utils.getRandomizedParameter((p1.getSightRange() + p2.getSightRange()) / 2,
-				Constantes.MUTATION_TOLERANCE);
-		this.speed = Utils.getRandomizedParameter((p1.getSpeed() + p2.getSpeed()) / 2, Constantes.MUTATION_TOLERANCE);
+				MUTATION_TOLERANCE);
+		this.speed = Utils.getRandomizedParameter((p1.getSpeed() + p2.getSpeed()) / 2, MUTATION_TOLERANCE);
 	}
 
 	protected void init(AnimalMapView regMngr) {
@@ -133,6 +133,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 		obj.put("gcode", geneticCode);
 		obj.put("diet", diet.toString());
 		obj.put("state", state.toString());
+		obj.put("age", this.age);
 		return obj;
 	}
 

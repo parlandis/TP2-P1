@@ -115,8 +115,10 @@ public class RegionManager implements AnimalMapView {
 		}
 	}
 
-	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter) {
+	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter) {  // TODO: mirar solo 
 		List<Animal> inRange = new ArrayList<>();
+		
+		//int colsMax = (int) a.getSightRange() 
 
 		for (int i = 0; i < this.rows; i++) {
 			for (int j = 0; j < this.cols; j++) {

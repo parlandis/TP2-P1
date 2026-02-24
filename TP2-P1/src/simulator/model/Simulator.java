@@ -120,11 +120,13 @@ public class Simulator implements JSONable {
 		Vector2D posL1 = new Vector2D(60.0, 60.0);
 		Vector2D posL2 = new Vector2D(80.0, 50.0);
 
-		Animal oveja1 = new Sheep(new SelectFirst(), new SelectClosest(), posO1);
-		Animal oveja2 = new Sheep(new SelectFirst(), new SelectClosest(), posO2);
+		Animal oveja1 = new Sheep(new SelectFirst(), new SelectFirst(), posO1);
+		//Animal oveja2 = new Sheep(new SelectFirst(), new SelectFirst(), posO2);
+		//Animal lobo = new Wolf(new SelectFirst(), new SelectFirst(), posL1);
 
 		sim.addAnimal(oveja1);
-		sim.addAnimal(oveja2);
+		//sim.addAnimal(oveja2);
+		//sim.addAnimal(lobo);
 		System.out.println("Simulador 2 O");
 
 		MapInfo m = sim.getMapInfo();
@@ -134,12 +136,12 @@ public class Simulator implements JSONable {
 
 		while (!sim.listaA.isEmpty()) {
 
-			System.out.println("Estado INicial: " + sim.asJSON());
+			System.out.println("Estado INicial: " + sim.asJSON().toString(3));
 
 			sim.advance(dt);
 			view.update(toAnimalsInfo(sim.getAnimals()), sim.getTime(), dt);
 
-			System.out.println("Estado Final:" + sim.asJSON());
+			System.out.println("Estado Final:" + sim.asJSON().toString(3));
 		}
 
 		view.close();

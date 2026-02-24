@@ -13,7 +13,7 @@ public class Sheep extends Animal {
 	final static double INIT_SIGHT_SHEEP = 40;
 	final static double INIT_SPEED_SHEEP = 35;
 	final static double BOOST_FACTOR_SHEEP = 2.0;
-	final static double MAX_AGE_SHEEP = 8;
+	final static double MAX_AGE_SHEEP = 1;
 	final static double FOOD_DROP_BOOST_FACTOR_SHEEP = 1.2;
 	final static double FOOD_DROP_RATE_SHEEP = 20.0;
 	final static double DESIRE_THRESHOLD_SHEEP = 65.0;
@@ -41,19 +41,19 @@ public class Sheep extends Animal {
 	public void update(double dt) {
 		switch(state) {
 		//1
-		case State.DEAD:
+		case DEAD:
 			return;
 		//2
-		case State.NORMAL:
+		case NORMAL:
 			doNormal(dt);
 			break;
-		case State.DANGER:
+		case DANGER:
 			doDanger(dt);
 			break;
-		case State.HUNGER:
+		case HUNGER:
 			doHunger(dt);
 			break;
-		case State.MATE:
+		case MATE:
 			doMate(dt);
 			break;
 		default:
@@ -71,14 +71,14 @@ public class Sheep extends Animal {
            this.state = State.NORMAL;
 		}
 		//4
-		if(this.energy <= 0.0 || this.age >= Constantes.MAX_AGE_SHEEP) {
+		if(this.energy <= 0.0 || this.age >= MAX_AGE_SHEEP) {
 			this.state = State.DEAD;
 		}
 		//5
 		if(this.state != State.DEAD) {
 			double food = this.regionMngr.getFood(this, dt);
 			this.energy += food;
-			if(this.energy > Constantes.MAX_ENERGY) this.energy = Constantes.MAX_ENERGY;
+			if(this.energy > MAX_ENERGY) this.energy = MAX_ENERGY;
 			
 		}
 
