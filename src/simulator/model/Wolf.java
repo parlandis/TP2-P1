@@ -3,240 +3,184 @@ package simulator.model;
 import simulator.misc.Utils;
 import simulator.misc.Vector2D;
 
-public class Wolf extends Animal  {
+public class Wolf extends Animal {
+
+	final static String WOLF_GENETIC_CODE = "Wolf";
+	final static double INIT_SIGHT_WOLF = 50.0;
+	final static double INIT_SPEED_WOLF = 60.0;
+	final static double BOOST_FACTOR_WOLF = 3.0;
+	final static double MAX_AGE_WOLF = 14.0;
+	final static double FOOD_THRESHOLD_WOLF = 50.0;
+	final static double FOOD_DROP_BOOST_FACTOR_WOLF = 1.2;
+	final static double FOOD_DROP_RATE_WOLF = 18.0;
+	final static double FOOD_EAT_VALUE_WOLF = 50.0;
+	final static double DESIRE_THRESHOLD_WOLF = 65.0;
+	final static double DESIRE_INCREASE_RATE_WOLF = 30.0;
+	final static double PREGNANT_PROBABILITY_WOLF = 0.75;
+
 	private Animal huntTarget;
 	private SelectionStrategy huntingStrategy;
-	
-	
-	
-	public Wolf(SelectionStrategy mateStrategy, SelectionStrategy huntingStrategy,  Vector2D pos) {
-		super("wolf", Diet.CARNIVORE,50.0, 60.0, mateStrategy, pos);
+
+	public Wolf(SelectionStrategy mateStrategy, SelectionStrategy huntingStrategy, Vector2D pos) {
+		super(WOLF_GENETIC_CODE, Diet.CARNIVORE, INIT_SIGHT_WOLF, INIT_SPEED_WOLF, mateStrategy, pos);
 		this.huntingStrategy = huntingStrategy;
 		this.huntTarget = null;
 	}
-	
-	
-	
+
 	protected Wolf(Wolf p1, Animal p2) {
 		super(p1, p2);
-		huntingStrategy = p1.huntingStrategy;
-		huntTarget = null;
+		this.huntingStrategy = p1.huntingStrategy;
+		this.huntTarget = null;
 	}
-	
-	
+
 	@Override
 	public void update(double dt) {
-		switch(state) {
-		//1
-		case State.DEAD:
+		if (state == State.DEAD)
 			return;
-		//2
-		case State.NORMAL:
-			doNormal(dt);
-			break;
-		case State.DANGER:
-			doHunger(dt);
-			break;
-		default:
-			return;
+
+		switch (state) {
+			case NORMAL:
+				doNormal(dt);
+				break;
+			case HUNGER:
+				doHunger(dt);
+				break;
+			case MATE:
+				doMate(dt);
+				break;
+			default:
+				break;
 		}
-		//3
-		double maxX = this.regionMngr.getWidth();
-		double maxY = this.regionMngr.getHeight();
-		
-		if(pos.getX() <= 0.0 || pos.getX() >= maxX || pos.getY() <= 0.0 || pos.getY() >= maxY) {
-            double validX = Utils.constrainValueInRange(pos.getX(), 0, maxX);
-            double validY = Utils.constrainValueInRange(pos.getY(), 0, maxY);
-            this.pos = new Vector2D(validX, validY);
-            
-           this.state = State.NORMAL;
+
+		if (pos.getX() < 0.0 || pos.getX() >= regionMngr.getWidth() || pos.getY() < 0.0
+				|| pos.getY() >= regionMngr.getHeight()) {
+			pos = new Vector2D(Utils.constrainValueInRange(pos.getX(), 0, regionMngr.getWidth() - 1),
+					Utils.constrainValueInRange(pos.getY(), 0, regionMngr.getHeight() - 1));
+			setState(State.NORMAL);
 		}
-		//4
-		if(this.energy <= 0.0 || this.age >= Constantes.MAX_AGE_WOLF) {
-			this.state = State.DEAD;
+
+		if (energy <= 0.0 || age > MAX_AGE_WOLF) {
+			setState(State.DEAD);
 		}
-		//5
-		if(this.state != State.DEAD) {
+
+		// 5. Comida de la region
+		if (this.state != State.DEAD) {
 			double food = this.regionMngr.getFood(this, dt);
 			this.energy += food;
-			if(this.energy > 100.0) this.energy = 100.0;
-			
+			if (this.energy > 100.0)
+				this.energy = 100.0;
 		}
-		
 	}
 
-
-
-
-
-
 	private void doNormal(double dt) {
-		//1.1
-		if(getDestination().distanceTo(this.getPosition()) < 8.0) {
-			new Vector2D();
-			Vector2D destination = Vector2D.get_random_vector(0.0, this.regionMngr.getCols());       // TODO: get new random destination
-			this.dest = destination;
+		if (dest.distanceTo(pos) < 8.0) {
+			this.dest = new Vector2D(Utils.RAND.nextDouble(0, this.regionMngr.getWidth()),
+					Utils.RAND.nextDouble(0, this.regionMngr.getHeight()));
 		}
-		//1.2
-		move(speed*dt*Math.exp((energy-100.0)*0.007));
+
+		move(speed * dt * Math.exp((energy - 100.0) * 0.007));
 		this.age += dt;
-		this.energy -= 18.0*dt;
-		this.desire += 30.0 *dt;
-		if(energy < 0.0) energy = 0.0;
-		if(energy > 100.0) energy = 100.0;
-		if(desire < 0.0) desire = 0.0;
-		if(desire > 100.0) desire = 100.0;
-		//2
-		if(energy < 50.0) {
+		this.energy = Math.max(0, this.energy - FOOD_DROP_RATE_WOLF * dt);
+		this.desire = Math.min(100.0, this.desire + DESIRE_INCREASE_RATE_WOLF * dt);
+
+		if (energy < FOOD_THRESHOLD_WOLF) {
 			setState(State.HUNGER);
-		}
-		else if(desire > 65.0) {
+		} else if (desire > DESIRE_THRESHOLD_WOLF) {
 			setState(State.MATE);
-		}	
+		}
 	}
 
 	private void doHunger(double dt) {
-		//1 
-		if(huntTarget == null || huntTarget.getState().equals(State.DEAD) || huntTarget.getPosition().distanceTo(getPosition()) > Constantes.INIT_SIGHT_WOLF) {
-			huntTarget = this.huntingStrategy.select(huntTarget, this.regionMngr.getAnimalsInRange(this, a ->a.getDiet() == Diet.HERBIVORE));  ;
+		if (huntTarget == null || huntTarget.getState() == State.DEAD
+				|| huntTarget.getPosition().distanceTo(pos) > sightRange) {
+			huntTarget = huntingStrategy.select(this,
+					this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.HERBIVORE));
 		}
-		if(huntTarget == null) {  //TODO: No entiendo como va lo de seguir el punto 1 
-			//1.1
-			Vector2D destination = this.getDestination();
-			if(destination.distanceTo(this.getPosition()) < 8.0) {
-				double x = Utils.RAND.nextDouble(0, this.regionMngr.getWidth());
-				double y = Utils.RAND.nextDouble(0, this.regionMngr.getHeight());
-				
-				destination = new Vector2D(x,y);       
-				this.dest = destination;
-			}
-			
-			//1.2
-			move(speed*dt*Math.exp((energy-100.0)*0.007));
-			this.age += dt;
-			this.energy -= 18.0*dt;
-			this.desire += 30.0 *dt;
-			if(energy < 0.0) energy = 0.0;
-			if(energy > 100.0) energy = 100.0;
-			if(desire < 0.0) desire = 0.0;
-			if(desire > 100.0) desire = 100.0;
-		}
-		else {
-			//2.1 
+
+		if (huntTarget == null) {
+			doNormal(dt);
+		} else {
 			this.dest = huntTarget.getPosition();
-			move(3.0*speed*dt*Math.exp((energy-100.0)*0.007));
+			move(BOOST_FACTOR_WOLF * speed * dt * Math.exp((energy - 100.0) * 0.007));
 			this.age += dt;
-			this.energy -= 18.0*1.2*dt;
-			this.desire += 30.0*dt;
-			if(energy < 0.0) energy = 0.0;
-			if(energy > 100.0) energy = 100.0;
-			if(desire < 0.0) desire = 0.0;
-			if(desire > 100.0) desire = 100.0;
-			
-			if(huntTarget.getPosition().distanceTo(this.getPosition()) < 8.0) {
+			this.energy = Math.max(0, this.energy - FOOD_DROP_RATE_WOLF * FOOD_DROP_BOOST_FACTOR_WOLF * dt);
+			this.desire = Math.min(100.0, this.desire + DESIRE_INCREASE_RATE_WOLF * dt);
+
+			if (pos.distanceTo(huntTarget.getPosition()) < 8.0) {
 				huntTarget.setState(State.DEAD);
 				huntTarget = null;
-				this.energy += 50.0;
-				if(this.energy > 100.0) this.energy = 100.0;
+				this.energy = Math.min(100.0, this.energy + FOOD_EAT_VALUE_WOLF);
 			}
 		}
-		//3
-		if(energy > 50.0) {
-			//3.2
-			if(desire > 65.0) {
+
+		if (energy > FOOD_THRESHOLD_WOLF) {
+			if (desire > DESIRE_THRESHOLD_WOLF)
 				setState(State.MATE);
-			}
-			else {
+			else
 				setState(State.NORMAL);
-			}
 		}
 	}
 
 	private void doMate(double dt) {
-		//1
-		if(this.mateTarget != null && (mateTarget.getState() == State.DEAD || mateTarget.getPosition().distanceTo(pos) > this.sightRange)) {
+		if (mateTarget != null
+				&& (mateTarget.getState() == State.DEAD || mateTarget.getPosition().distanceTo(pos) > sightRange)) {
 			mateTarget = null;
 		}
-		//2
-		if(mateTarget == null) {
-			mateTarget =  this.mateStrategy.select(this.mateTarget, this.regionMngr.getAnimalsInRange(this, a -> a.geneticCode == Constantes.WOLF_GENETIC_CODE));
-			if(mateTarget == null) {
-				move(speed*dt*Math.exp((energy-100.0)*0.007));
+
+		if (mateTarget == null) {
+			mateTarget = mateStrategy.select(this,
+					this.regionMngr.getAnimalsInRange(this, a -> a.geneticCode.equals(WOLF_GENETIC_CODE)));
+			if (mateTarget == null) {
+				doNormal(dt);
 			}
-		}
-		else {
-			// 2.1)
+		} else {
 			this.dest = mateTarget.getPosition();
-			move(3.0*speed*dt*Math.exp((energy-100.0)*0.007));
+			move(BOOST_FACTOR_WOLF * speed * dt * Math.exp((energy - 100.0) * 0.007));
 			this.age += dt;
-			this.energy -= 18.0*1.2*dt;
-			this.desire += 30.0*dt;
-			if(energy < 0.0) energy = 0.0;
-			if(energy > 100.0) energy = 100.0;
-			if(desire < 0.0) desire = 0.0;
-			if(desire > 100.0) desire = 100.0;
-			
-			if(this.pos.distanceTo(mateTarget.getPosition()) < 8.0) {
+			this.energy = Math.max(0, this.energy - FOOD_DROP_RATE_WOLF * FOOD_DROP_BOOST_FACTOR_WOLF * dt);
+			this.desire = Math.min(100.0, this.desire + DESIRE_INCREASE_RATE_WOLF * dt);
+
+			if (pos.distanceTo(mateTarget.getPosition()) < 8.0) {
 				this.desire = 0.0;
 				mateTarget.desire = 0.0;
-				if(this.baby == null) { 
-					if(Utils.RAND.nextDouble() < 0.75) {
-						this.baby = new Wolf(this, mateTarget);
-					}
+				if (baby == null && Utils.RAND.nextDouble() < PREGNANT_PROBABILITY_WOLF) {
+					baby = new Wolf(this, mateTarget);
 				}
-				this.energy -= 10.0;
-				if(this.energy < 0.0) this.energy = 0.0;	
+				this.energy = Math.max(0, this.energy - 10.0);
 				mateTarget = null;
 			}
 		}
-		if(this.energy < 50.0) {
+
+		if (energy < FOOD_THRESHOLD_WOLF) {
 			setState(State.HUNGER);
+		} else if (desire < DESIRE_THRESHOLD_WOLF) {
+			setState(State.NORMAL);
 		}
-		 else if(this.desire < 65.0) {
-			 setState(State.NORMAL);
-		 }	
 	}
 
-	@Override  // TODO: No entiendo como va lo de los estados, si es que hay que hacer algo en cada uno o no
+	@Override
 	protected void setNormalStateAction() {
-		// TODO Auto-generated method stub
-		
+		huntTarget = null;
+		mateTarget = null;
 	}
-
-
 
 	@Override
 	protected void setMateStateAction() {
-		// TODO Auto-generated method stub
-		
+		huntTarget = null;
 	}
-
-
 
 	@Override
 	protected void setHungerStateAction() {
-		// TODO Auto-generated method stub
-		
+		mateTarget = null;
 	}
-
-
 
 	@Override
 	protected void setDangerStateAction() {
-		// TODO Auto-generated method stub
-		
 	}
-
-
 
 	@Override
 	protected void setDeadStateAction() {
-		// TODO Auto-generated method stub
-		
-	}	
-
-	
-
-	
-	
+		huntTarget = null;
+		mateTarget = null;
+	}
 }
