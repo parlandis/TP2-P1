@@ -20,7 +20,7 @@ public class RegionManager implements AnimalMapView {
 	private int regHeight;
 	protected Map<Animal, Region> animalRegion;
 	protected Region[][] regions;
-	
+
 	public RegionManager(int cols, int rows, int width, int height) {
 		this.cols = cols;
 		this.rows = rows;
@@ -32,114 +32,150 @@ public class RegionManager implements AnimalMapView {
 		this.regWidth = width / cols;
 		this.initRegs();
 	}
-	
+
 	protected void setRegion(int row, int col, Region r) {
-		this.regions[row][col] = r;
-		
-		List<Animal> listaA = this.regions[row][col].getAnimals();
-		while(!listaA.isEmpty()) {
-			Animal a = listaA.getFirst();
-			animalRegion.put(a, r);
-			updateAnimalRegion(a);
-			listaA.removeFirst();
+		Region oldRegion = regions[row][col];
+		regions[row][col] = r;
+
+		if (oldRegion != null) {
+			for (Animal a : oldRegion.getAnimals()) {
+				r.addAnimal(a);
+				animalRegion.put(a, r);
+			}
 		}
 	}
-	
-	protected void registerAnimal(Animal a) {  
-		int c = (int) (a.getPosition().getX() / this.regWidth);   //TODO: No se si hay que usar casteos 
-		int r = (int) (a.getPosition().getY() / this.regHeight);  
-		Region reg = regions[r][c];
+
+	protected void registerAnimal(Animal a) {
 		a.init(this);
+		int c = (int) (a.getPosition().getX() / this.regWidth);
+		int r = (int) (a.getPosition().getY() / this.regHeight);
+
+		// Asegurar que los índices están dentro de los límites
+		if (c >= cols)
+			c = cols - 1;
+		if (r >= rows)
+			r = rows - 1;
+		if (c < 0)
+			c = 0;
+		if (r < 0)
+			r = 0;
+
+		Region reg = regions[r][c];
 		animalRegion.put(a, reg);
 		reg.addAnimal(a);
-		
+
 		this.updateAnimalRegion(a);
 	}
-	
+
 	protected void unregisterAnimal(Animal a) {
 		Region r = animalRegion.get(a);
 		r.removeAnimal(a);
 	}
-	
+
 	private Region regionByPosition(Animal a) {// Devolvemos la Region a la que pertenece el animal segun su regiopn
-		// Pos del animal 
-		int c = (int) (a.getPosition().getX() / this.regWidth);   //TODO: No se si hay que usar casteos 
-		int r = (int) (a.getPosition().getY() / this.regHeight);  
-		Region reg = regions[c][r];
+		// Pos del animal
+		int c = (int) (a.getPosition().getX() / this.regWidth);
+		int r = (int) (a.getPosition().getY() / this.regHeight);
+
+		if (c >= cols)
+			c = cols - 1;
+		if (r >= rows)
+			r = rows - 1;
+		if (c < 0)
+			c = 0;
+		if (r < 0)
+			r = 0;
+
+		Region reg = regions[r][c];
 		return reg;
-		
+
 	}
 
-	
-	protected void updateAnimalRegion(Animal a) { 
-		Region actual = animalRegion.get(a); 
+	protected void updateAnimalRegion(Animal a) {
+		Region actual = animalRegion.get(a);
 		Region region = regionByPosition(a);
-		if(actual != region) {  // Comprobamos que el animal se ha o no movido de region
-			 region.addAnimal(a);
-			 actual.removeAnimal(a);
-			 animalRegion.put(a, region);
+		if (actual != region) { // Comprobamos que el animal se ha o no movido de region
+			region.addAnimal(a);
+			actual.removeAnimal(a);
+			animalRegion.put(a, region);
 		}
-		
+
 	}
-	
+
 	@Override
 	public double getFood(AnimalInfo a, double dt) {
 		return animalRegion.get(a).getFood(a, dt);
 	}
-	
 
 	protected void updateAllRegions(double dt) {
-		for(int i = 0; i < this.rows; i++) {
-			for(int j = 0; j < this.cols; j++) {
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
 				regions[i][j].update(dt);
 			}
 		}
 	}
-	
-	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter){
+
+	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter) {
 		List<Animal> inRange = new ArrayList<>();
-		
-		for(int i = 0; i < this.rows; i++) {
-			for(int j = 0; j < this.cols; j++) {
+
+		double x = a.getPosition().getX();
+		double y = a.getPosition().getY();
+		double r = a.getSightRange();
+
+		int cFrom = (int) ((x - r) / regWidth);
+		int cTo = (int) ((x + r) / regWidth);
+		int rFrom = (int) ((y - r) / regHeight);
+		int rTo = (int) ((y + r) / regHeight);
+
+		// Ajustar límites
+		cFrom = Math.max(0, cFrom);
+		cTo = Math.min(cols - 1, cTo);
+		rFrom = Math.max(0, rFrom);
+		rTo = Math.min(rows - 1, rTo);
+
+		for (int i = rFrom; i <= rTo; i++) {
+			for (int j = cFrom; j <= cTo; j++) {
 				List<Animal> animals = regions[i][j].getAnimals();
-				for(Animal animal : animals) {
-					if(animal.getPosition().distanceTo(a.getPosition()) <= a.getSightRange() && filter.test(animal) && !animal.equals(a)) {
+				for (Animal animal : animals) {
+					if (!animal.equals(a) && animal.getPosition().distanceTo(a.getPosition()) <= r
+							&& filter.test(animal)) {
 						inRange.add(animal);
 					}
 				}
 			}
 		}
-		
-		return inRange;	
+
+		return inRange;
 	}
-	
+
 	public JSONObject asJSON() {
 		JSONObject jo = new JSONObject();
 		JSONArray JsRegiones = new JSONArray();
-		
-		for(int i = 0; i < this.rows; i++) {
-			for(int j = 0; j < this.cols; j++) {
-				 JSONObject r = new JSONObject();
-				 r.put("row", i);
-				 r.put("col", j);
-				 JSONObject reg = this.regions[i][j].asJSON();
-				 r.put("data", reg);
-				 JsRegiones.put(r);
+
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				JSONObject r = new JSONObject();
+
+				r.put("row", i);
+				r.put("col", j);
+				JSONObject reg = this.regions[i][j].asJSON();
+				r.put("data", reg);
+				JsRegiones.put(r);
 			}
 		}
-		
+
 		jo.put("regions", JsRegiones);
 		return jo;
 	}
-	
+
 	private void initRegs() {
-		for(int i = 0; i < this.rows; i++) {
-			for(int j = 0; j < this.cols; j++) {
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
 				regions[i][j] = new DefaultRegion();
 			}
 		}
 	}
-	
+
 	@Override
 	public int getCols() {
 		return cols;
@@ -147,7 +183,7 @@ public class RegionManager implements AnimalMapView {
 
 	@Override
 	public int getRows() {
-		return rows;	
+		return rows;
 	}
 
 	@Override
@@ -169,7 +205,5 @@ public class RegionManager implements AnimalMapView {
 	public int getRegionHeight() {
 		return regHeight;
 	}
-
-
 
 }

@@ -1,10 +1,12 @@
 package simulator.factories;
 
 import org.json.JSONObject;
+
 import simulator.model.DynamicSupplyRegion;
 import simulator.model.Region;
 
 public class DynamicSupplyRegionBuilder extends Builder<Region> {
+
 	public DynamicSupplyRegionBuilder() {
 		super("dynamic", "Dynamic Supply Region");
 	}
@@ -21,4 +23,5 @@ public class DynamicSupplyRegionBuilder extends Builder<Region> {
 		
 		return new DynamicSupplyRegion(food, factor);
 	}
+
 }

@@ -2,7 +2,9 @@ package simulator.launcher;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +18,7 @@ import org.apache.commons.cli.ParseException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import simulator.*;
+import simulator.control.Controller;
 import simulator.factories.Builder;
 import simulator.factories.BuilderBasedFactory;
 import simulator.factories.DefaultRegionBuilder;
@@ -24,20 +26,16 @@ import simulator.factories.DynamicSupplyRegionBuilder;
 import simulator.factories.Factory;
 import simulator.factories.SelectClosestBuilder;
 import simulator.factories.SelectFirstBuilder;
-import simulator.factories.SelectYoungestBuilder;
 import simulator.factories.SheepBuilder;
+import simulator.factories.SelectYoungestBuilder;
 import simulator.factories.WolfBuilder;
 import simulator.misc.Utils;
 import simulator.model.Animal;
 import simulator.model.Region;
 import simulator.model.SelectionStrategy;
+import simulator.model.Simulator;
 
 public class Main {
-	
-	private static Factory<Animal> animalFactory;
-	private static Factory<Region> regionFactory;
-	private static Factory<SelectionStrategy> strategyFactory;
-	
 
 	private enum ExecMode {
 		BATCH("batch", "Batch mode"), GUI("gui", "Graphical User Interface mode");
@@ -62,12 +60,17 @@ public class Main {
 	// default values for some parameters
 	//
 	private final static Double DEFAULT_TIME = 10.0; // in seconds
+	private final static Double DEFAULT_DELTA_TIME = 0.03; // in seconds
 
 	// some attributes to stores values corresponding to command-line parameters
 	//
 	private static Double time = null;
+	private static Double deltaTime = null;
 	private static String inFile = null;
+	private static String outFile = null;
+	private static boolean simpleViewer = false;
 	private static ExecMode mode = ExecMode.BATCH;
+	private static Long seed = null;
 	private static Factory<Animal> _animalFactory;
 	private static Factory<Region> _regionFactory;
 	private static Factory<SelectionStrategy> _strategyFactory;
@@ -85,7 +88,12 @@ public class Main {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
 			parseInFileOption(line);
+			parseOutFileOption(line);
 			parseTimeOption(line);
+			parseDeltaTimeOption(line);
+			parseSimpleViewerOption(line);
+			parseModeOption(line);
+			parseSeedOption(line);
 
 			// if there are some remaining arguments, then something wrong is
 			// provided in the command line!
@@ -116,9 +124,32 @@ public class Main {
 
 		// steps
 		cmdLineOptions.addOption(Option.builder("t").longOpt("time").hasArg()
-				.desc("A real number representing the total simulation time in seconds. Default value: "
+				.desc("An real number representing the total simulation time in seconds. Default value: "
 						+ DEFAULT_TIME + ".")
 				.build());
+
+		// delta-time
+		cmdLineOptions.addOption(Option.builder("dt").longOpt("delta-time").hasArg()
+				.desc("A double representing actual time, in seconds, per simulation step. Default value: "
+						+ DEFAULT_DELTA_TIME + ".")
+				.build());
+
+		// output file
+		cmdLineOptions.addOption(
+				Option.builder("o").longOpt("output").hasArg().desc("Output file, where output is written.").build());
+
+		// simple-viewer
+		cmdLineOptions.addOption(
+				Option.builder("sv").longOpt("simple-viewer").desc("Show the viewer window in console mode.").build());
+
+		// mode
+		cmdLineOptions.addOption(
+				Option.builder("m").longOpt("mode").hasArg().desc("Execution mode. Values: 'batch' (default), 'gui'.")
+						.build());
+
+		// seed
+		cmdLineOptions.addOption(
+				Option.builder("sr").longOpt("seed").hasArg().desc("A seed for the random number generator.").build());
 
 		return cmdLineOptions;
 	}
@@ -148,33 +179,93 @@ public class Main {
 		}
 	}
 
-	private static void initFactories() {
-		// initialize the strategies factory  
-		List<Builder<SelectionStrategy>> selectionStrategyBuilders = new ArrayList<>();  
-		selectionStrategyBuilders.add(new SelectFirstBuilder());  
-		selectionStrategyBuilders.add(new SelectClosestBuilder());  
+	private static void parseDeltaTimeOption(CommandLine line) throws ParseException {
+		String dt = line.getOptionValue("dt", DEFAULT_DELTA_TIME.toString());
+		try {
+			deltaTime = Double.parseDouble(dt);
+			assert (deltaTime > 0);
+		} catch (Exception e) {
+			throw new ParseException("Invalid value for delta-time: " + dt);
+		}
+	}
 
-		Factory<SelectionStrategy> selectionStrategyFactory = new BuilderBasedFactory<SelectionStrategy>(selectionStrategyBuilders);
-	
-		List<Builder<Animal>>animalsBuilders = new ArrayList<>();
-		animalsBuilders.add(new SheepBuilder(selectionStrategyFactory));
-		animalsBuilders.add(new WolfBuilder(selectionStrategyFactory));
-		Factory<Animal> animalsFactory = new BuilderBasedFactory<Animal>(animalsBuilders);
-		
+	private static void parseOutFileOption(CommandLine line) {
+		outFile = line.getOptionValue("o");
+	}
+
+	private static void parseSimpleViewerOption(CommandLine line) {
+		simpleViewer = line.hasOption("sv");
+	}
+
+	private static void parseModeOption(CommandLine line) throws ParseException {
+		String m = line.getOptionValue("m", "batch");
+		for (ExecMode em : ExecMode.values()) {
+			if (em.getTag().equalsIgnoreCase(m)) {
+				mode = em;
+				return;
+			}
+		}
+		throw new ParseException("Invalid value for mode: " + m);
+	}
+
+	private static void parseSeedOption(CommandLine line) throws ParseException {
+		if (line.hasOption("sr")) {
+			try {
+				seed = Long.parseLong(line.getOptionValue("sr"));
+			} catch (Exception e) {
+				throw new ParseException("Invalid value for seed: " + line.getOptionValue("sr"));
+			}
+		}
+	}
+
+	private static void initFactories() {
+		// initialize the strategies factory
+		List<Builder<SelectionStrategy>> selectionStrategyBuilders = new ArrayList<>();
+		selectionStrategyBuilders.add(new SelectFirstBuilder());
+		selectionStrategyBuilders.add(new SelectClosestBuilder());
+		selectionStrategyBuilders.add(new SelectYoungestBuilder());
+		_strategyFactory = new BuilderBasedFactory<SelectionStrategy>(
+				selectionStrategyBuilders);
+
+		List<Builder<Animal>> animalsBuilders = new ArrayList<>();
+		animalsBuilders.add(new SheepBuilder(_strategyFactory));
+		animalsBuilders.add(new WolfBuilder(_strategyFactory));
+		_animalFactory = new BuilderBasedFactory<Animal>(animalsBuilders);
+
 		List<Builder<Region>> regionsBuilder = new ArrayList<>();
 		regionsBuilder.add(new DefaultRegionBuilder());
 		regionsBuilder.add(new DynamicSupplyRegionBuilder());
-		Factory<Region> regionsFactory = new BuilderBasedFactory<Region>(regionsBuilder);
-	
+		_regionFactory = new BuilderBasedFactory<Region>(regionsBuilder);
+
 	}
 
 	private static JSONObject loadJSONFile(InputStream in) {
 		return new JSONObject(new JSONTokener(in));
 	}
 
-
 	private static void startBatchMode() throws Exception {
 		InputStream is = new FileInputStream(new File(inFile));
+		JSONObject json = loadJSONFile(is);
+		is.close();
+
+		int width = json.optInt("width", 800);
+		int height = json.optInt("height", 600);
+		int rows = json.optInt("rows", 20);
+		int cols = json.optInt("cols", 15);
+
+		// Factories are already initialized by start() calling initFactories()
+
+		Simulator sim = new Simulator(cols, rows, width, height, _animalFactory, _regionFactory);
+		Controller ctrl = new Controller(sim);
+		ctrl.loadData(json);
+
+		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
+
+		ctrl.run(time, deltaTime, simpleViewer, out);
+
+		if (out != System.out) {
+			out.close();
+		}
 	}
 
 	private static void startGUIMode() throws Exception {
@@ -184,28 +275,23 @@ public class Main {
 	private static void start(String[] args) throws Exception {
 		initFactories();
 		parseArgs(args);
+		if (seed != null) {
+			Utils.RAND.setSeed(seed);
+		} else {
+			Utils.RAND.setSeed(2147483647l);
+		}
 		switch (mode) {
-		case BATCH:
-			startBatchMode();
-			break;
-		case GUI:
-			startGUIMode();
-			break;
+			case BATCH:
+				startBatchMode();
+				break;
+			case GUI:
+				startGUIMode();
+				break;
 		}
 	}
 
 	public static void main(String[] args) {
-		Utils.RAND.setSeed(2147483647l);
 		try {
-			//TODO: PRUEBA SIN JSON
-			int cols = 3;
-			int rows = 3;
-			int width = 800;
-			
-			
-			
-			
-			
 			start(args);
 		} catch (Exception e) {
 			System.err.println("Something went wrong ...");
@@ -213,4 +299,5 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
+
 }
