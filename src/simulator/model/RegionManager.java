@@ -9,7 +9,6 @@ import java.util.function.Predicate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import simulator.misc.Vector2D;
 
 public class RegionManager implements AnimalMapView {
 	protected int cols;
@@ -33,7 +32,7 @@ public class RegionManager implements AnimalMapView {
 		this.initRegs();
 	}
 
-	protected void setRegion(int row, int col, Region r) {
+	protected void setRegion(int row, int col, Region r) { // Cambia la region de la posicion row col por r
 		Region oldRegion = regions[row][col];
 		regions[row][col] = r;
 
@@ -45,7 +44,7 @@ public class RegionManager implements AnimalMapView {
 		}
 	}
 
-	protected void registerAnimal(Animal a) {
+	protected void registerAnimal(Animal a) { // Añade el animal a la region correspondiente a su posicion
 		a.init(this);
 		int c = (int) (a.getPosition().getX() / this.regWidth);
 		int r = (int) (a.getPosition().getY() / this.regHeight);
@@ -73,7 +72,7 @@ public class RegionManager implements AnimalMapView {
 	}
 
 	private Region regionByPosition(Animal a) {// Devolvemos la Region a la que pertenece el animal segun su regiopn
-		// Pos del animal
+
 		int c = (int) (a.getPosition().getX() / this.regWidth);
 		int r = (int) (a.getPosition().getY() / this.regHeight);
 
@@ -115,7 +114,7 @@ public class RegionManager implements AnimalMapView {
 		}
 	}
 
-	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter) {
+	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter) {  //la hacemos para que sea dentro del mapa y en rangop 
 		List<Animal> inRange = new ArrayList<>();
 
 		double x = a.getPosition().getX();
@@ -133,12 +132,11 @@ public class RegionManager implements AnimalMapView {
 		rFrom = Math.max(0, rFrom);
 		rTo = Math.min(rows - 1, rTo);
 
-		for (int i = rFrom; i <= rTo; i++) {
-			for (int j = cFrom; j <= cTo; j++) {
+		for (int i = rFrom; i <= rTo; i++) {   // Recorremos las regiones dentro del rango calculado
+			for (int j = cFrom; j <= cTo; j++) { // Recorremos los animales de cada region y comprobamos si estan dentro del rango de vision y cumplen el filtro
 				List<Animal> animals = regions[i][j].getAnimals();
 				for (Animal animal : animals) {
-					if (!animal.equals(a) && animal.getPosition().distanceTo(a.getPosition()) <= r
-							&& filter.test(animal)) {
+					if (!animal.equals(a) && animal.getPosition().distanceTo(a.getPosition()) <= r && filter.test(animal)) {
 						inRange.add(animal);
 					}
 				}

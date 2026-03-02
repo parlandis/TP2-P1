@@ -1,6 +1,5 @@
 package simulator.model;
 
-//prueba 
 import org.json.JSONObject;
 
 import simulator.misc.Utils;
@@ -32,6 +31,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 	protected AnimalMapView regionMngr;
 	protected SelectionStrategy mateStrategy;
 
+	// Constructores
 	protected Animal(String geneticCode, Diet diet, double sightRange, double initSpeed, SelectionStrategy mateStrategy,
 			Vector2D pos) throws IllegalArgumentException {
 		if (geneticCode == null || geneticCode.isBlank() || sightRange <= 0.0 || initSpeed <= 0.0
@@ -68,25 +68,22 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.geneticCode = p1.getGeneticCode();
 		this.diet = p1.getDiet();
 		this.mateStrategy = p2.mateStrategy;
-		this.pos = p1.getPosition().plus(
-				Vector2D.get_random_vector(-1, 1).scale(NEARBY_FACTOR * (Utils.RAND.nextGaussian() + 1)));
-		this.sightRange = Utils.getRandomizedParameter((p1.getSightRange() + p2.getSightRange()) / 2,
-				MUTATION_TOLERANCE);
+		this.pos = p1.getPosition().plus(Vector2D.get_random_vector(-1, 1).scale(NEARBY_FACTOR * (Utils.RAND.nextGaussian() + 1)));
+		this.sightRange = Utils.getRandomizedParameter((p1.getSightRange() + p2.getSightRange()) / 2,MUTATION_TOLERANCE);
 		this.speed = Utils.getRandomizedParameter((p1.getSpeed() + p2.getSpeed()) / 2, MUTATION_TOLERANCE);
 	}
-
+	
+	//Inicia el animal con pos aleatoria si no tine una , y la ajusta a los limites del mapa 
 	protected void init(AnimalMapView regMngr) {
 		this.regionMngr = regMngr;
 
 		if (this.pos == null) {
-			this.pos = new Vector2D(Utils.RAND.nextDouble(0, regMngr.getWidth()),
-					Utils.RAND.nextDouble(0, regMngr.getHeight()));
+			this.pos = new Vector2D(Utils.RAND.nextDouble(0, regMngr.getWidth()),Utils.RAND.nextDouble(0, regMngr.getHeight()));
 		} else {
 			this.pos = adjustPos(this.pos, regMngr.getWidth(), regMngr.getHeight());
 		}
 
-		this.dest = new Vector2D(Utils.RAND.nextDouble(0, regMngr.getWidth()),
-				Utils.RAND.nextDouble(0, regMngr.getHeight()));
+		this.dest = new Vector2D(Utils.RAND.nextDouble(0, regMngr.getWidth()), Utils.RAND.nextDouble(0, regMngr.getHeight()));
 	}
 
 	private Vector2D adjustPos(Vector2D p, int w, int h) {
@@ -107,7 +104,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 	public void update(double dt) {
 
 	}
-
+	//Nace el bebe
 	protected Animal deliverBaby() {
 		Animal bebe = this.baby;
 		this.baby = null;
@@ -118,7 +115,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.pos = pos.plus(dest.minus(pos).direction().scale(speed));
 	}
 
-	protected void setState(State state) { // TODO: NO tiene sentido estos metodos
+	protected void setState(State state) { 
 		this.state = state;
 		switch (state) {
 			case NORMAL:

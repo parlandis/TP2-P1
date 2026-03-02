@@ -28,17 +28,19 @@ public class BuilderBasedFactory<T> implements Factory<T> {
 		this.builders.put(b.getTypeTag(), b);
 		this.buildersInfo.add(b.getInfo());  
 	}
-
+	
 	@Override  
 	public T createInstance(JSONObject info) {  
 		if (info == null) {  
 			throw new IllegalArgumentException("’info’ cannot be null");  
 		}
 		
+		//Buscamos el builder a partir del tag del tipo
 		String type = info.getString("type");
 		Builder<T> builder = this.builders.get(type);
 		
 		if(builder != null) {
+			//Si el builder existe, obtenemos los datos del JSON ,si los hay y creamos la instancia a partir del builder
 			JSONObject data = info.has("data") ? info.getJSONObject("data") : new JSONObject();
 			T instance = builder.createInstance(data); 
 			
@@ -52,7 +54,7 @@ public class BuilderBasedFactory<T> implements Factory<T> {
 	}
 
 	@Override  
-	public List<JSONObject> getInfo() {  
+	public List<JSONObject> getInfo() {   
 		return Collections.unmodifiableList(buildersInfo);  
 	}
 

@@ -51,14 +51,12 @@ public class Wolf extends Animal {
 			default:
 				break;
 		}
-
-		if (pos.getX() < 0.0 || pos.getX() >= regionMngr.getWidth() || pos.getY() < 0.0
-				|| pos.getY() >= regionMngr.getHeight()) {
-			pos = new Vector2D(Utils.constrainValueInRange(pos.getX(), 0, regionMngr.getWidth() - 1),
-					Utils.constrainValueInRange(pos.getY(), 0, regionMngr.getHeight() - 1));
+		// 3. Limitar posición dentro de los límites de la región
+		if (pos.getX() < 0.0 || pos.getX() >= regionMngr.getWidth() || pos.getY() < 0.0 || pos.getY() >= regionMngr.getHeight()) {
+			pos = new Vector2D(Utils.constrainValueInRange(pos.getX(), 0, regionMngr.getWidth() - 1),Utils.constrainValueInRange(pos.getY(), 0, regionMngr.getHeight() - 1));
 			setState(State.NORMAL);
 		}
-
+		// 4. Muerte por edad o falta de energía
 		if (energy <= 0.0 || age > MAX_AGE_WOLF) {
 			setState(State.DEAD);
 		}
@@ -71,11 +69,10 @@ public class Wolf extends Animal {
 				this.energy = 100.0;
 		}
 	}
-
+ 
 	private void doNormal(double dt) {
 		if (dest.distanceTo(pos) < 8.0) {
-			this.dest = new Vector2D(Utils.RAND.nextDouble(0, this.regionMngr.getWidth()),
-					Utils.RAND.nextDouble(0, this.regionMngr.getHeight()));
+			this.dest = new Vector2D(Utils.RAND.nextDouble(0, this.regionMngr.getWidth()), Utils.RAND.nextDouble(0, this.regionMngr.getHeight()));
 		}
 
 		move(speed * dt * Math.exp((energy - 100.0) * 0.007));
@@ -91,12 +88,11 @@ public class Wolf extends Animal {
 	}
 
 	private void doHunger(double dt) {
-		if (huntTarget == null || huntTarget.getState() == State.DEAD
-				|| huntTarget.getPosition().distanceTo(pos) > sightRange) {
-			huntTarget = huntingStrategy.select(this,
-					this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.HERBIVORE));
+		// 1. Buscar presa
+		if (huntTarget == null || huntTarget.getState() == State.DEAD|| huntTarget.getPosition().distanceTo(pos) > sightRange) {
+			huntTarget = huntingStrategy.select(this, this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.HERBIVORE));
 		}
-
+		// 2. Si no hay presa, moverse aleatoriamente
 		if (huntTarget == null) {
 			doNormal(dt);
 		} else {
@@ -122,24 +118,24 @@ public class Wolf extends Animal {
 	}
 
 	private void doMate(double dt) {
-		if (mateTarget != null
-				&& (mateTarget.getState() == State.DEAD || mateTarget.getPosition().distanceTo(pos) > sightRange)) {
+		// 1. Buscar pareja
+		if (mateTarget != null && (mateTarget.getState() == State.DEAD || mateTarget.getPosition().distanceTo(pos) > sightRange)) {
 			mateTarget = null;
 		}
-
+        // 2. Si no hay pareja, buscar una nueva
 		if (mateTarget == null) {
-			mateTarget = mateStrategy.select(this,
-					this.regionMngr.getAnimalsInRange(this, a -> a.geneticCode.equals(WOLF_GENETIC_CODE)));
+			mateTarget = mateStrategy.select(this, this.regionMngr.getAnimalsInRange(this, a -> a.geneticCode.equals(WOLF_GENETIC_CODE)));
 			if (mateTarget == null) {
 				doNormal(dt);
 			}
+		// 3. Si hay pareja, moverse hacia ella
 		} else {
 			this.dest = mateTarget.getPosition();
 			move(BOOST_FACTOR_WOLF * speed * dt * Math.exp((energy - 100.0) * 0.007));
 			this.age += dt;
 			this.energy = Math.max(0, this.energy - FOOD_DROP_RATE_WOLF * FOOD_DROP_BOOST_FACTOR_WOLF * dt);
 			this.desire = Math.min(100.0, this.desire + DESIRE_INCREASE_RATE_WOLF * dt);
-
+			// 4. Si se alcanza a la pareja, intentar reproducirse
 			if (pos.distanceTo(mateTarget.getPosition()) < 8.0) {
 				this.desire = 0.0;
 				mateTarget.desire = 0.0;
@@ -150,7 +146,7 @@ public class Wolf extends Animal {
 				mateTarget = null;
 			}
 		}
-
+		// 5. Si durante el proceso de apareamiento el lobo se queda con hambre, cambiar a estado de hambre
 		if (energy < FOOD_THRESHOLD_WOLF) {
 			setState(State.HUNGER);
 		} else if (desire < DESIRE_THRESHOLD_WOLF) {

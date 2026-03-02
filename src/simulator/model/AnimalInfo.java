@@ -1,7 +1,7 @@
 package simulator.model;
 import simulator.misc.Vector2D;
 
-public interface AnimalInfo extends JSONable { // Note that it extends JSONable  
+public interface AnimalInfo extends JSONable { 
 	public State getState();  
 	public Vector2D getPosition();  
 	public String getGeneticCode();  

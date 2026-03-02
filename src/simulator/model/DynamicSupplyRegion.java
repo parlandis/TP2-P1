@@ -12,9 +12,7 @@ public class DynamicSupplyRegion extends Region{
 	}
 	
 	@Override
-	public double getFood(AnimalInfo a, double dt) {
-		
-		
+	public double getFood(AnimalInfo a, double dt) {   //Da alimento a los herbivoros
 		if(a.getDiet().equals(Diet.CARNIVORE)) return 0.0;
 		double comido =  Math.min(food,60.0*Math.exp(-Math.max(0,this.nH-5.0)*2.0)*dt);
 		food -= comido;

@@ -8,10 +8,7 @@ import java.util.List;
 import org.json.JSONObject;
 
 import simulator.factories.Factory;
-import simulator.misc.Vector2D;
 
-import simulator.view.SimpleObjectViewer;
-import simulator.view.SimpleObjectViewer.ObjInfo;
 
 public class Simulator implements JSONable {
 	private RegionManager reMng;
@@ -60,13 +57,7 @@ public class Simulator implements JSONable {
 		return this.time;
 	}
 
-	private static List<ObjInfo> toAnimalsInfo(List<? extends AnimalInfo> animals) {
-		List<ObjInfo> ol = new ArrayList<>(animals.size());
-		for (AnimalInfo a : animals)
-			ol.add(new ObjInfo(a.getGeneticCode(), (int) a.getPosition().getX(), (int) a.getPosition().getY(),
-					(int) Math.round(a.getAge()) + 2));
-		return ol;
-	}
+
 
 	public void advance(double dt) {
 		// 1. Incrementar el tiempo
@@ -111,6 +102,7 @@ public class Simulator implements JSONable {
 		return jo;
 	}
 
+	/*
 	public static void main(String[] args) {
 
 		Simulator sim = new Simulator(1, 1, 100, 100, null, null);
@@ -146,5 +138,5 @@ public class Simulator implements JSONable {
 
 		view.close();
 
-	}
+	}*/
 }

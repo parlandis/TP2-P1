@@ -12,8 +12,8 @@ public class DynamicSupplyRegionBuilder extends Builder<Region> {
 	}
 
 	@Override
-	protected simulator.model.Region createInstance(JSONObject data) {
-		double food = 1000.0;
+	protected Region createInstance(JSONObject data) {
+		double food = 100.0;
 		double factor = 2.0;
 		
 		if(data.has("food")) {

@@ -34,7 +34,7 @@ public class Sheep extends Animal {
 	@Override
 	public void update(double dt) {
 		switch (state) {
-			// 1
+			// 1 
 			case DEAD:
 				return;
 			// 2
@@ -53,7 +53,7 @@ public class Sheep extends Animal {
 			default:
 				return;
 		}
-		// 3
+		// 3 - Limitar posición dentro de los límites de la región
 		double maxX = this.regionMngr.getWidth();
 		double maxY = this.regionMngr.getHeight();
 
@@ -64,11 +64,11 @@ public class Sheep extends Animal {
 
 			this.setState(State.NORMAL);
 		}
-		// 4
+		// 4 - Comprobar si muere por edad o energía
 		if (this.energy <= 0.0 || this.age >= MAX_AGE_SHEEP) {
 			this.setState(State.DEAD);
 		}
-		// 5
+		// 5 - Comida de la región
 		if (this.state != State.DEAD) {
 			double food = this.regionMngr.getFood(this, dt);
 			this.energy += food;
@@ -79,7 +79,7 @@ public class Sheep extends Animal {
 
 	}
 
-	private void doNormal(double dt) { // TODO: mirar bien como funciona lo del normalStateAction
+	private void doNormal(double dt) {
 		// 1
 		Vector2D destination = this.getDestination();
 		// 1.1
@@ -92,24 +92,16 @@ public class Sheep extends Animal {
 		}
 
 		// 1.2
-		move(speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR)); // No se si se mueve bien
+		move(speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR)); 
 		this.age += dt;
 		this.energy -= FOOD_DROP_RATE_SHEEP * dt;
 		this.desire += DESIRE_INCREASE_RATE_SHEEP * dt;
-		if (energy < 0.0)
-			energy = 0.0;
-		if (energy > MAX_ENERGY)
-			energy = MAX_ENERGY;
-		if (desire < 0.0)
-			desire = 0.0;
-		if (desire > MAX_DESIRE)
-			desire = MAX_DESIRE;
+		controlDesireEnergy();
 
 		// 2
 		// 2.1
 		if (dangerSource == null) {
-			dangerSource = dangerStrategy.select(this,
-					this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
+			dangerSource = dangerStrategy.select(this, this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
 		}
 
 		if (dangerSource != null) {
@@ -144,8 +136,7 @@ public class Sheep extends Animal {
 		// 3)
 		if (dangerSource == null || dangerSource.getPosition().distanceTo(pos) > this.sightRange) {
 			// 3.1)
-			dangerSource = dangerStrategy.select(this,
-					this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
+			dangerSource = dangerStrategy.select(this,this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
 
 			// 3.1.b)
 			if (dangerSource == null) {
@@ -163,16 +154,14 @@ public class Sheep extends Animal {
 
 	protected void doMate(double dt) {
 		// 1)
-		if (mateTarget != null && (mateTarget.getState() == State.DEAD
-				|| mateTarget.getPosition().distanceTo(pos) > this.sightRange)) {
+		if (mateTarget != null && (mateTarget.getState() == State.DEAD || mateTarget.getPosition().distanceTo(pos) > this.sightRange)) {
 			mateTarget = null;
 		}
 		// 2)
 		if (mateTarget == null) {
-			mateTarget = this.mateStrategy.select(this,
-					this.regionMngr.getAnimalsInRange(this, a -> a.getGeneticCode().equals(SHEEP_GENETIC_CODE)));
+			mateTarget = this.mateStrategy.select(this, this.regionMngr.getAnimalsInRange(this, a -> a.getGeneticCode().equals(SHEEP_GENETIC_CODE)));
 			if (mateTarget == null) {
-				move(speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR)); // No se si se mueve bien
+				move(speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR)); 
 			}
 		} else {
 			// 2.1)
@@ -198,8 +187,7 @@ public class Sheep extends Animal {
 		}
 		// 3)
 		if (dangerSource == null) {
-			dangerSource = dangerStrategy.select(this,
-					this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
+			dangerSource = dangerStrategy.select(this,this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
 		}
 		if (dangerSource != null) {
 			setState(State.DANGER);
@@ -209,11 +197,8 @@ public class Sheep extends Animal {
 	}
 
 	protected void doHunger(double dt) {
-		// TODO Auto-generated method stub
-
 	}
 
-	// TODO: No se que hacer con estas mierdas
 	@Override
 	protected void setDeadStateAction() {
 		dangerSource = null;

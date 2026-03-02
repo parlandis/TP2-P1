@@ -12,7 +12,7 @@ public class DefaultRegion extends Region {
 
 	@Override
 	public void update(double dt) {
-		// Does nothing as per requirement
+
 	}
 
 }

@@ -153,6 +153,8 @@ public class Main {
 
 		return cmdLineOptions;
 	}
+	
+	//Parseamos todas las opciones
 
 	private static void parseHelpOption(CommandLine line, Options cmdLineOptions) {
 		if (line.hasOption("h")) {
@@ -218,14 +220,14 @@ public class Main {
 		}
 	}
 
+	
 	private static void initFactories() {
-		// initialize the strategies factory
+		//Inicializamos las factorias con los builder para cada tipo 
 		List<Builder<SelectionStrategy>> selectionStrategyBuilders = new ArrayList<>();
 		selectionStrategyBuilders.add(new SelectFirstBuilder());
 		selectionStrategyBuilders.add(new SelectClosestBuilder());
 		selectionStrategyBuilders.add(new SelectYoungestBuilder());
-		_strategyFactory = new BuilderBasedFactory<SelectionStrategy>(
-				selectionStrategyBuilders);
+		_strategyFactory = new BuilderBasedFactory<SelectionStrategy>(selectionStrategyBuilders);
 
 		List<Builder<Animal>> animalsBuilders = new ArrayList<>();
 		animalsBuilders.add(new SheepBuilder(_strategyFactory));
@@ -238,27 +240,34 @@ public class Main {
 		_regionFactory = new BuilderBasedFactory<Region>(regionsBuilder);
 
 	}
-
+	
+	//Cargamos es Json
 	private static JSONObject loadJSONFile(InputStream in) {
 		return new JSONObject(new JSONTokener(in));
 	}
-
+	
+	
 	private static void startBatchMode() throws Exception {
+		// Cargamos el JSON de configuración
 		InputStream is = new FileInputStream(new File(inFile));
 		JSONObject json = loadJSONFile(is);
 		is.close();
 
+		
 		int width = json.optInt("width", 800);
 		int height = json.optInt("height", 600);
 		int rows = json.optInt("rows", 20);
 		int cols = json.optInt("cols", 15);
 
-		// Factories are already initialized by start() calling initFactories()
 
+		//Instanciamos el simulador, el controlador y ejecutamos la simulación
 		Simulator sim = new Simulator(cols, rows, width, height, _animalFactory, _regionFactory);
 		Controller ctrl = new Controller(sim);
+		
+		//Cargamos los datos del Json al controlador
 		ctrl.loadData(json);
 
+		//Configuramos donde se va a escribir la salida de la simulación
 		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
 
 		ctrl.run(time, deltaTime, simpleViewer, out);

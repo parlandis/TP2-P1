@@ -5,7 +5,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.print.attribute.standard.JobSheets;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,7 +15,7 @@ import simulator.model.Simulator;
 import simulator.view.SimpleObjectViewer;
 import simulator.view.SimpleObjectViewer.ObjInfo;
 
-public class Controller { // TODO: Tiene que estar aqui las factorias o en sim ???
+public class Controller { 
 	private Simulator sim;
 
 	public Controller(Simulator sim) {
@@ -24,23 +23,25 @@ public class Controller { // TODO: Tiene que estar aqui las factorias o en sim ?
 	}
 
 	public void loadData(JSONObject data) {
+
+		// Si hay regiones se cargan primero
 		if (data.has("regions")) {
 			JSONArray regiones = data.getJSONArray("regions");
 			for (int i = 0; i < regiones.length(); i++) {
 				JSONObject regGroup = regiones.getJSONObject(i);
 
 				int rStart, rEnd, cStart, cEnd;
-
-				if (regGroup.get("row") instanceof JSONArray) {
-					JSONArray rRange = regGroup.getJSONArray("row");
+				//Determinamos el rango de filas con el inicio y el final 
+				JSONArray rRange = regGroup.optJSONArray("row");
+				if (rRange != null) {
 					rStart = rRange.getInt(0);
 					rEnd = rRange.getInt(1);
 				} else {
 					rStart = rEnd = regGroup.getInt("row");
 				}
 
-				if (regGroup.get("col") instanceof JSONArray) {
-					JSONArray cRange = regGroup.getJSONArray("col");
+				JSONArray cRange = regGroup.optJSONArray("col");
+				if (cRange != null) {
 					cStart = cRange.getInt(0);
 					cEnd = cRange.getInt(1);
 				} else {
@@ -70,19 +71,19 @@ public class Controller { // TODO: Tiene que estar aqui las factorias o en sim ?
 			}
 		}
 	}
-
+    //Funciona para poder coonvertir la info de los animales para el visor
 	private List<ObjInfo> toAnimalsInfo(List<? extends AnimalInfo> animals) {
 		List<ObjInfo> ol = new ArrayList<>(animals.size());
 		for (AnimalInfo a : animals)
-			ol.add(new ObjInfo(a.getGeneticCode(), (int) a.getPosition().getX(), (int) a.getPosition().getY(),
-					(int) Math.round(a.getAge()) + 2));
+			ol.add(new ObjInfo(a.getGeneticCode(), (int) a.getPosition().getX(), (int) a.getPosition().getY(), (int) Math.round(a.getAge()) + 2));
 		return ol;
 	}
 
 	public void run(double t, double dt, boolean sv, OutputStream out) {
-
+		
 		JSONObject initState = new JSONObject();
 		JSONObject finalState = new JSONObject();
+		//Estado inicial de la simulación
 		initState = sim.asJSON();
 
 		SimpleObjectViewer view = null;
@@ -91,14 +92,14 @@ public class Controller { // TODO: Tiene que estar aqui las factorias o en sim ?
 			view = new SimpleObjectViewer("[ECOSYSTEM]", m.getWidth(), m.getHeight(), m.getCols(), m.getRows());
 			view.update(toAnimalsInfo(sim.getAnimals()), sim.getTime(), dt);
 		}
-
+		
+		//Bucle de simulación
 		while (t > sim.getTime()) {
 			sim.advance(dt);
-			if (sv)
-				view.update(toAnimalsInfo(sim.getAnimals()), sim.getTime(), dt);
+			if (sv) view.update(toAnimalsInfo(sim.getAnimals()), sim.getTime(), dt);
 		}
+		
 		finalState = sim.asJSON();
-
 		JSONObject salida = new JSONObject();
 		salida.put("in", initState);
 		salida.put("out", finalState);
@@ -106,8 +107,7 @@ public class Controller { // TODO: Tiene que estar aqui las factorias o en sim ?
 		PrintStream ps = new PrintStream(out);
 		ps.println(salida.toString(2));
 
-		if (sv)
-			view.close();
+		if (sv) view.close();
 	}
 
 }
