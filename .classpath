@@ -6,8 +6,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="D:/Uni/TP2-P1/lib/lib/commons-cli-1.4.jar"/>
-	<classpathentry kind="lib" path="D:/Uni/TP2-P1/lib/lib/json.jar"/>
-	<classpathentry kind="lib" path="D:/Uni/TP2-P1/lib/lib/viewer.jar"/>
+	<classpathentry kind="lib" path="C:/Users/pable/eclipse-workspace/TP2-P1/lib/lib/commons-cli-1.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/pable/eclipse-workspace/TP2-P1/lib/lib/json.jar"/>
+	<classpathentry kind="lib" path="C:/Users/pable/eclipse-workspace/TP2-P1/lib/lib/viewer.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
