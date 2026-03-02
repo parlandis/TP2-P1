@@ -3,6 +3,7 @@ package simulator.factories;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import simulator.misc.Utils;
 import simulator.misc.Vector2D;
 import simulator.model.Animal;
 import simulator.model.SelectFirst;
@@ -21,8 +22,14 @@ public class SheepBuilder extends Builder<Animal> {
 	protected Sheep createInstance(JSONObject data) {
 		Vector2D pos = null;
 		if (data.has("pos")) {
-			JSONArray p = data.getJSONArray("pos");
-			pos = new Vector2D(p.getDouble(0), p.getDouble(1));
+			JSONObject p = data.getJSONObject("pos");
+			
+			JSONArray xRange = p.getJSONArray("x_range");
+			JSONArray yRange = p.getJSONArray("y_range");
+
+			double x = Utils.RAND.nextDouble(xRange.getDouble(0), xRange.getDouble(1));
+			double y = Utils.RAND.nextDouble(yRange.getDouble(0), yRange.getDouble(1));
+			pos = new Vector2D(x, y);
 		}
 
 		SelectionStrategy mateStrategy = null;
