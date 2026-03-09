@@ -23,7 +23,7 @@ public class SheepBuilder extends Builder<Animal> {
 		Vector2D pos = null;
 		if (data.has("pos")) {
 			JSONObject p = data.getJSONObject("pos");
-			
+
 			JSONArray xRange = p.getJSONArray("x_range");
 			JSONArray yRange = p.getJSONArray("y_range");
 

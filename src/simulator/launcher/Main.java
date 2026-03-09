@@ -65,15 +65,15 @@ public class Main {
 	// some attributes to stores values corresponding to command-line parameters
 	//
 	private static Double time = null;
-	private static Double deltaTime = null;
+	public static Double deltaTime = null;
 	private static String inFile = null;
 	private static String outFile = null;
 	private static boolean simpleViewer = false;
 	private static ExecMode mode = ExecMode.BATCH;
 	private static Long seed = null;
-	private static Factory<Animal> _animalFactory;
-	private static Factory<Region> _regionFactory;
-	private static Factory<SelectionStrategy> _strategyFactory;
+	public static Factory<Animal> _animalFactory;
+	public static Factory<Region> _regionFactory;
+	public static Factory<SelectionStrategy> _strategyFactory;
 
 	private static void parseArgs(String[] args) {
 
@@ -153,8 +153,8 @@ public class Main {
 
 		return cmdLineOptions;
 	}
-	
-	//Parseamos todas las opciones
+
+	// Parseamos todas las opciones
 
 	private static void parseHelpOption(CommandLine line, Options cmdLineOptions) {
 		if (line.hasOption("h")) {
@@ -220,9 +220,8 @@ public class Main {
 		}
 	}
 
-	
 	private static void initFactories() {
-		//Inicializamos las factorias con los builder para cada tipo 
+		// Inicializamos las factorias con los builder para cada tipo
 		List<Builder<SelectionStrategy>> selectionStrategyBuilders = new ArrayList<>();
 		selectionStrategyBuilders.add(new SelectFirstBuilder());
 		selectionStrategyBuilders.add(new SelectClosestBuilder());
@@ -240,34 +239,31 @@ public class Main {
 		_regionFactory = new BuilderBasedFactory<Region>(regionsBuilder);
 
 	}
-	
-	//Cargamos es Json
+
+	// Cargamos es Json
 	private static JSONObject loadJSONFile(InputStream in) {
 		return new JSONObject(new JSONTokener(in));
 	}
-	
-	
+
 	private static void startBatchMode() throws Exception {
 		// Cargamos el JSON de configuración
 		InputStream is = new FileInputStream(new File(inFile));
 		JSONObject json = loadJSONFile(is);
 		is.close();
 
-		
 		int width = json.optInt("width", 800);
 		int height = json.optInt("height", 600);
 		int rows = json.optInt("rows", 20);
 		int cols = json.optInt("cols", 15);
 
-
-		//Instanciamos el simulador, el controlador y ejecutamos la simulación
+		// Instanciamos el simulador, el controlador y ejecutamos la simulación
 		Simulator sim = new Simulator(cols, rows, width, height, _animalFactory, _regionFactory);
 		Controller ctrl = new Controller(sim);
-		
-		//Cargamos los datos del Json al controlador
+
+		// Cargamos los datos del Json al controlador
 		ctrl.loadData(json);
 
-		//Configuramos donde se va a escribir la salida de la simulación
+		// Configuramos donde se va a escribir la salida de la simulación
 		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
 
 		ctrl.run(time, deltaTime, simpleViewer, out);

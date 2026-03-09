@@ -18,12 +18,12 @@ public class WolfBuilder extends Builder<Animal> {
 		this.strategyFactory = strategyFactory;
 	}
 
-	@Override  // Creamos un objeto lobo a partir del jSOn
+	@Override // Creamos un objeto lobo a partir del jSOn
 	protected Wolf createInstance(JSONObject data) {
 		Vector2D pos = null;
 		if (data.has("pos")) {
 			JSONObject p = data.getJSONObject("pos");
-			
+
 			JSONArray xRange = p.getJSONArray("x_range");
 			JSONArray yRange = p.getJSONArray("y_range");
 
@@ -35,7 +35,8 @@ public class WolfBuilder extends Builder<Animal> {
 		SelectionStrategy mateStrategy = null;
 		SelectionStrategy huntingStrategy = null;
 
-		if (data.has("mate_strategy")) { // Si el JSON tiene una estrategia de apareamiento, la creamos a partir del JSON llamando a la factoria de estretegoias
+		if (data.has("mate_strategy")) { // Si el JSON tiene una estrategia de apareamiento, la creamos a partir del
+											// JSON llamando a la factoria de estretegoias
 			mateStrategy = strategyFactory.createInstance(data.getJSONObject("mate_strategy"));
 		} else {
 			mateStrategy = new SelectFirst();

@@ -15,13 +15,19 @@ public class DynamicSupplyRegionBuilder extends Builder<Region> {
 	protected Region createInstance(JSONObject data) {
 		double food = 100.0;
 		double factor = 2.0;
-		
-		if(data.has("food")) {
+
+		if (data.has("food")) {
 			food = data.getDouble("food");
 		}
-		if(data.has("factor")) factor = data.getDouble("factor");
-		
+		if (data.has("factor"))
+			factor = data.getDouble("factor");
+
 		return new DynamicSupplyRegion(food, factor);
+	}
+
+	@Override
+	protected void fillInData(JSONObject o) { // TODO: hacer
+
 	}
 
 }

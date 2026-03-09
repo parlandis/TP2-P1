@@ -2,13 +2,13 @@ package simulator.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 
 public class RegionManager implements AnimalMapView {
 	protected int cols;
@@ -114,7 +114,8 @@ public class RegionManager implements AnimalMapView {
 		}
 	}
 
-	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter) {  //la hacemos para que sea dentro del mapa y en rangop 
+	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter) { // la hacemos para que sea dentro del
+																				// mapa y en rangop
 		List<Animal> inRange = new ArrayList<>();
 
 		double x = a.getPosition().getX();
@@ -132,11 +133,13 @@ public class RegionManager implements AnimalMapView {
 		rFrom = Math.max(0, rFrom);
 		rTo = Math.min(rows - 1, rTo);
 
-		for (int i = rFrom; i <= rTo; i++) {   // Recorremos las regiones dentro del rango calculado
-			for (int j = cFrom; j <= cTo; j++) { // Recorremos los animales de cada region y comprobamos si estan dentro del rango de vision y cumplen el filtro
+		for (int i = rFrom; i <= rTo; i++) { // Recorremos las regiones dentro del rango calculado
+			for (int j = cFrom; j <= cTo; j++) { // Recorremos los animales de cada region y comprobamos si estan dentro
+													// del rango de vision y cumplen el filtro
 				List<Animal> animals = regions[i][j].getAnimals();
 				for (Animal animal : animals) {
-					if (!animal.equals(a) && animal.getPosition().distanceTo(a.getPosition()) <= r && filter.test(animal)) {
+					if (!animal.equals(a) && animal.getPosition().distanceTo(a.getPosition()) <= r
+							&& filter.test(animal)) {
 						inRange.add(animal);
 					}
 				}
@@ -202,6 +205,12 @@ public class RegionManager implements AnimalMapView {
 	@Override
 	public int getRegionHeight() {
 		return regHeight;
+	}
+
+	@Override
+	public Iterator<RegionData> iterator() {
+		// TODO Implementar el iterador
+		return null;
 	}
 
 }

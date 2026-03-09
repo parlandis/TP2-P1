@@ -35,7 +35,7 @@ public abstract class Region implements Entity, FoodSupplier, RegionInfo {
 	}
 
 	final List<Animal> getAnimals() {
-		return Collections.unmodifiableList(animales);
+		return new ArrayList<>(animales);
 	}
 
 	public JSONObject asJSON() {
@@ -55,5 +55,7 @@ public abstract class Region implements Entity, FoodSupplier, RegionInfo {
 
 	@Override
 	public abstract void update(double dt);
+
+	public abstract String toString();
 
 }

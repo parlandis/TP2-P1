@@ -15,4 +15,10 @@ public class DefaultRegion extends Region {
 
 	}
 
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
