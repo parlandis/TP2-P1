@@ -8,7 +8,7 @@ import simulator.model.Region;
 public class DynamicSupplyRegionBuilder extends Builder<Region> {
 
 	public DynamicSupplyRegionBuilder() {
-		super("dynamic", "Dynamic Supply Region");
+		super("dynamic", "Dynamic food supply");
 	}
 
 	@Override
@@ -26,8 +26,9 @@ public class DynamicSupplyRegionBuilder extends Builder<Region> {
 	}
 
 	@Override
-	protected void fillInData(JSONObject o) { // TODO: hacer
-
+	protected void fillInData(JSONObject o) {
+		o.put("factor", "food increase factor (optional, default 2.0)");
+		o.put("food", "initial amount of food (optional, default 100.0)");
 	}
 
 }

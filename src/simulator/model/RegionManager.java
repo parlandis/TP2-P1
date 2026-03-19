@@ -209,8 +209,13 @@ public class RegionManager implements AnimalMapView {
 
 	@Override
 	public Iterator<RegionData> iterator() {
-		// TODO Implementar el iterador
-		return null;
+		List<RegionData> res = new ArrayList<>();
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				res.add(new RegionData(i, j, regions[i][j]));
+			}
+		}
+		return res.iterator();
 	}
 
 }

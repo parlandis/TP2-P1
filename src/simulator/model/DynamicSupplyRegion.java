@@ -31,13 +31,6 @@ public class DynamicSupplyRegion extends Region {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<AnimalInfo> getAnimalsInfo() {
-		
-		return null;
+		return "Dynamic food supply";
 	}
 }
