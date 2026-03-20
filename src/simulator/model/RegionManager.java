@@ -49,7 +49,6 @@ public class RegionManager implements AnimalMapView {
 		int c = (int) (a.getPosition().getX() / this.regWidth);
 		int r = (int) (a.getPosition().getY() / this.regHeight);
 
-		// Asegurar que los índices están dentro de los límites
 		if (c >= cols)
 			c = cols - 1;
 		if (r >= rows)

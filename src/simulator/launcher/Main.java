@@ -274,7 +274,28 @@ public class Main {
 	}
 
 	private static void startGUIMode() throws Exception {
-		throw new UnsupportedOperationException("GUI mode is not ready yet ...");
+		Simulator sim;
+		Controller ctrl;
+		
+		if (inFile != null) {
+			InputStream is = new FileInputStream(new File(inFile));
+			JSONObject json = loadJSONFile(is);
+			is.close();
+
+			int width = json.optInt("width", 800);
+			int height = json.optInt("height", 600);
+			int rows = json.optInt("rows", 20);
+			int cols = json.optInt("cols", 15);
+
+			sim = new Simulator(cols, rows, width, height, _animalFactory, _regionFactory);
+			ctrl = new Controller(sim);
+			ctrl.loadData(json);
+		} else {
+			sim = new Simulator(15, 20, 800, 600, _animalFactory, _regionFactory);
+			ctrl = new Controller(sim);
+		}
+		
+		javax.swing.SwingUtilities.invokeAndWait(() -> new simulator.view.MainWindow(ctrl));
 	}
 
 	private static void start(String[] args) throws Exception {

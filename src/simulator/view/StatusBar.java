@@ -15,10 +15,20 @@ import simulator.model.RegionInfo;
 class StatusBar extends JPanel implements EcoSysObserver {
 
 	  // TODO Añadir los atributos necesarios.  
+	private Controller ctrl;
+	private double time;
+	private int numAnimals;
+	private int numRows;
+	private int numCols;
+	private int width;
+	private int height;
+	
 
 	  StatusBar(Controller ctrl) {  
 	    initGUI();  
 	    // TODO registrar this como observador  
+	    this.ctrl = ctrl;
+	    
 	  }
 
 	  private void initGUI() {  
