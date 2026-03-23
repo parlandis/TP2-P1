@@ -35,14 +35,12 @@ public class MainWindow extends JFrame {
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 		mainPanel.add(contentPanel, BorderLayout.CENTER);
 
-		// TODO crear la tabla de especies y añadirla a contentPanel.
 		// Usa setPreferredSize(new Dimension(500, 250)) para fijar su tamaño
 
 		SpeciesTableModel st = new SpeciesTableModel(ctrl);
 		st.setPreferredSize(new Dimension(500, 250));
 		contentPanel.add(st);
-
-		// TODO crear la tabla de regiones.
+		
 		// Usa setPreferredSize(new Dimension(500, 250)) para fijar su tamaño
 
 		RegionsTableModel rt = new RegionsTableModel(ctrl);
@@ -50,6 +48,7 @@ public class MainWindow extends JFrame {
 
 		// TODO llama a ViewUtils.quit(MainWindow.this) en el método windowClosing
 		// addWindowListener(...);
+		
 		ViewUtils.quit(this);
 
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -64,13 +63,11 @@ public class MainWindow extends JFrame {
 	}
 
 	public void pack() {
-		// TODO Auto-generated method stub
 		super.pack();
 
 	}
 
 	public void setDefaultCloseOperation(int operation) {
-		// TODO Auto-generated method stub
 		super.setDefaultCloseOperation(operation);
 	}
 
