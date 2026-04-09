@@ -66,7 +66,7 @@ class ControlPanel extends JPanel {
 		// Botón Map
 		this.mapButton = new JButton();
 		this.mapButton.setToolTipText("Show Map");
-		this.mapButton.setIcon(new ImageIcon("resources/icons/viewer.png"));
+		this.mapButton.setIcon(new ImageIcon("resources/resources/icons/viewer.png"));
 		this.mapButton.addActionListener((e) -> new MapWindow(ViewUtils.getWindow(this), this.ctrl));
 		this.toolaBar.add(mapButton);
 

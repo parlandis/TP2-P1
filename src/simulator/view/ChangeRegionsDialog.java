@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 
@@ -50,6 +51,13 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 	    JPanel mainPanel = new JPanel();  
 	    mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));  
 	    setContentPane(mainPanel);
+	    
+	    JPanel ayuda = new JPanel();
+	    ayuda.add(new JLabel("Selecciona un tipo de region, un intervalo de filas/columnas y provee valores para los parametros.\n"));
+	    mainPanel.add(ayuda);
+	    
+	    //JPanel 
+	    
 
 	    // TODO crea varios paneles para organizar los componentes visuales en el  
 	    //      dialogo, y añadelos al mainpanel. P.ej., uno para el texto de ayuda,

@@ -69,7 +69,7 @@ public class Main {
 	private static String inFile = null;
 	private static String outFile = null;
 	private static boolean simpleViewer = false;
-	private static ExecMode mode = ExecMode.BATCH;
+	private static ExecMode mode = ExecMode.GUI;
 	private static Long seed = null;
 	public static Factory<Animal> _animalFactory;
 	public static Factory<Region> _regionFactory;
@@ -87,12 +87,12 @@ public class Main {
 		try {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
+			parseModeOption(line);
 			parseInFileOption(line);
 			parseOutFileOption(line);
 			parseTimeOption(line);
 			parseDeltaTimeOption(line);
 			parseSimpleViewerOption(line);
-			parseModeOption(line);
 			parseSeedOption(line);
 
 			// if there are some remaining arguments, then something wrong is
@@ -200,7 +200,7 @@ public class Main {
 	}
 
 	private static void parseModeOption(CommandLine line) throws ParseException {
-		String m = line.getOptionValue("m", "batch");
+		String m = line.getOptionValue("m", "gui");
 		for (ExecMode em : ExecMode.values()) {
 			if (em.getTag().equalsIgnoreCase(m)) {
 				mode = em;

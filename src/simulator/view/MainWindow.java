@@ -35,21 +35,23 @@ public class MainWindow extends JFrame {
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 		mainPanel.add(contentPanel, BorderLayout.CENTER);
 
-		// Usa setPreferredSize(new Dimension(500, 250)) para fijar su tamaño
+		// Species table
+		InfoTable speciesTable = new InfoTable("Species", new SpeciesTableModel(ctrl));
+		speciesTable.setPreferredSize(new Dimension(500, 250));
+		contentPanel.add(speciesTable);
 
-		SpeciesTableModel st = new SpeciesTableModel(ctrl);
-		st.setPreferredSize(new Dimension(500, 250));
-		contentPanel.add(st);
-		
-		// Usa setPreferredSize(new Dimension(500, 250)) para fijar su tamaño
+		// Regions table
+		InfoTable regionsTable = new InfoTable("Regions", new RegionsTableModel(ctrl));
+		regionsTable.setPreferredSize(new Dimension(500, 250));
+		contentPanel.add(regionsTable);
 
-		RegionsTableModel rt = new RegionsTableModel(ctrl);
-		contentPanel.add(rt);
-
-		// TODO llama a ViewUtils.quit(MainWindow.this) en el método windowClosing
-		// addWindowListener(...);
-		
-		ViewUtils.quit(this);
+		// Window listener
+		addWindowListener(new java.awt.event.WindowAdapter() {
+			@Override
+			public void windowClosing(java.awt.event.WindowEvent e) {
+				ViewUtils.quit(MainWindow.this);
+			}
+		});
 
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		pack();
