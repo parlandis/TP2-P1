@@ -61,7 +61,17 @@ public abstract class Region implements Entity, FoodSupplier, RegionInfo {
 		return Collections.unmodifiableList(animales);
 	}
 
+	public abstract double getFoodAmount();
+
 	@Override
 	public abstract String toString();
+	
+	public int getNH() {
+		return nH;
+	}
+	
+	public int getNC() {
+		return nC;
+	}
 
 }

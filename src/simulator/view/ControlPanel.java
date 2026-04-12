@@ -56,7 +56,7 @@ class ControlPanel extends JPanel {
 
 		// Botón Open
 		this.openButton = new JButton();
-		this.openButton.setToolTipText("Open");
+		this.openButton.setToolTipText("Cargar un fichero de configuración en la simulación");
 		this.openButton.setIcon(new ImageIcon("resources/icons/open.png"));
 		this.openButton.addActionListener((e) -> openFile());
 		this.toolaBar.add(openButton);
@@ -66,7 +66,7 @@ class ControlPanel extends JPanel {
 		// Botón Map
 		this.mapButton = new JButton();
 		this.mapButton.setToolTipText("Show Map");
-		this.mapButton.setIcon(new ImageIcon("resources/resources/icons/viewer.png"));
+		this.mapButton.setIcon(new ImageIcon("resources/icons/viewer.png"));
 		this.mapButton.addActionListener((e) -> new MapWindow(ViewUtils.getWindow(this), this.ctrl));
 		this.toolaBar.add(mapButton);
 

@@ -16,6 +16,11 @@ public class DefaultRegion extends Region {
 	}
 
 	@Override
+	public double getFoodAmount() {
+		return 0.0;
+	}
+
+	@Override
 	public String toString() {
 		return "Infinite food supply";
 	}

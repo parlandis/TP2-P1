@@ -1,7 +1,10 @@
 package simulator.view;
 
-import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -10,67 +13,98 @@ import simulator.model.AnimalInfo;
 import simulator.model.EcoSysObserver;
 import simulator.model.MapInfo;
 import simulator.model.RegionInfo;
+import simulator.model.State;
 
 class SpeciesTableModel extends AbstractTableModel implements EcoSysObserver {
 
-	// TODO definir atributos necesarios
+	private static final long serialVersionUID = 1L;
+
+	private List<String> _species;
+	private Map<String, Map<State, Integer>> _data;
 
 	SpeciesTableModel(Controller ctrl) {
-		// TODO inicializar estructuras de datos correspondientes
-		// TODO registrar this como observador
+		_species = new ArrayList<>();
+		_data = new HashMap<>();
+		ctrl.addObserver(this);
 	}
-	// TODO el resto de métodos van aquí …
+
+	private void update(List<AnimalInfo> animals) {
+		_species.clear();
+		_data.clear();
+
+		for (AnimalInfo a : animals) {
+			String g = a.getGeneticCode();
+			if (!_data.containsKey(g)) {
+				_species.add(g);
+				Map<State, Integer> statesCount = new HashMap<>();
+				// Inicializar todos los estados posibles a 0 dinámicamente
+				for (State s : State.values()) {
+					statesCount.put(s, 0);
+				}
+				_data.put(g, statesCount);
+			}
+			Map<State, Integer> counts = _data.get(g);
+			counts.put(a.getState(), counts.get(a.getState()) + 1);
+		}
+
+		Collections.sort(_species);
+		fireTableDataChanged();
+	}
 
 	@Override
 	public int getRowCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		return _species.size();
 	}
 
 	@Override
 	public int getColumnCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		// 1 para 'Species' + el número de estados en el enum
+		return 1 + State.values().length;
+	}
+
+	@Override
+	public String getColumnName(int col) {
+		if (col == 0) {
+			return "Species";
+		} else {
+			// Usamos el nombre del enum directamente
+			return State.values()[col - 1].name();
+		}
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		// TODO Auto-generated method stub
-		return null;
+		String speciesName = _species.get(rowIndex);
+		if (columnIndex == 0) {
+			return speciesName;
+		} else {
+			State state = State.values()[columnIndex - 1];
+			return _data.get(speciesName).get(state);
+		}
 	}
 
 	@Override
 	public void onRegister(double time, MapInfo map, List<AnimalInfo> animals) {
-		// TODO Auto-generated method stub
-
+		update(animals);
 	}
 
 	@Override
 	public void onReset(double time, MapInfo map, List<AnimalInfo> animals) {
-		// TODO Auto-generated method stub
-
+		update(animals);
 	}
 
 	@Override
 	public void onAnimalAdded(double time, MapInfo map, List<AnimalInfo> animals, AnimalInfo a) {
-		// TODO Auto-generated method stub
-
+		update(animals);
 	}
 
 	@Override
 	public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) {
-		// TODO Auto-generated method stub
-
+		// El cambio de tipo de región no afecta a la población directamente
 	}
 
 	@Override
 	public void onAdvance(double time, MapInfo map, List<AnimalInfo> animals, double dt) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void setPreferredSize(Dimension dimension) {
-		// TODO Auto-generated method stub
-
+		update(animals);
 	}
 }

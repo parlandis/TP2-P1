@@ -30,6 +30,11 @@ public class DynamicSupplyRegion extends Region {
 	}
 
 	@Override
+	public double getFoodAmount() {
+		return food;
+	}
+
+	@Override
 	public String toString() {
 		return "Dynamic food supply";
 	}

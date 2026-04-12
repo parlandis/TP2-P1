@@ -9,6 +9,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import org.json.JSONObject;
@@ -58,6 +60,22 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 	    
 	    //JPanel 
 	    
+	    JPanel tablaPanel = new JPanel();
+	    
+	    String[] columnas = {"Key", "Value", "Description"};
+	    DefaultTableModel model = new DefaultTableModel(columnas, 0);
+        JTable tabla = new JTable(model);	
+        tablaPanel.add(tabla);
+        JScrollPane scrollPane = new JScrollPane(tabla);
+        tablaPanel.add(scrollPane); 
+		mainPanel.add(tablaPanel);
+        
+	    
+	    
+	  
+	    
+		  
+		  
 
 	    // TODO crea varios paneles para organizar los componentes visuales en el  
 	    //      dialogo, y añadelos al mainpanel. P.ej., uno para el texto de ayuda,
