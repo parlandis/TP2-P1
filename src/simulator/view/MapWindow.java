@@ -37,8 +37,7 @@ class MapWindow extends JFrame implements EcoSysObserver {
 	    viewer = new MapViewer();
 	    mainPanel.add(viewer, BorderLayout.CENTER);
 
-	    // TODO en el método windowClosing, eliminar ‘MapWindow.this’ de los
-	    //      observadores
+	    
 	    addWindowListener(new java.awt.event.WindowAdapter() {
 	        @Override
 	        public void windowClosing(java.awt.event.WindowEvent e) {
@@ -83,6 +82,8 @@ class MapWindow extends JFrame implements EcoSysObserver {
 
 	  @Override
 	  public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) { //TODO: Aqui si cambia 
+		  
+		  
 	  }
 
 	  @Override
