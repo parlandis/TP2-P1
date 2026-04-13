@@ -36,12 +36,6 @@ class MapWindow extends JFrame implements EcoSysObserver {
 	    
 	    viewer = new MapViewer();
 	    mainPanel.add(viewer, BorderLayout.CENTER);
-	    
-	    // TODO poner contentPane como mainPanel
-
-	    // TODO crear el viewer y añadirlo a mainPanel (en el centro)
-	    
-	    
 
 	    // TODO en el método windowClosing, eliminar ‘MapWindow.this’ de los
 	    //      observadores
@@ -63,7 +57,6 @@ class MapWindow extends JFrame implements EcoSysObserver {
 	      setResizable(false);  
 	      setVisible(true);  
 	  }  
-	  // TODO otros métodos van aquí….  
 	  
 	  void addWindowListener() {
 		  
@@ -71,14 +64,12 @@ class MapWindow extends JFrame implements EcoSysObserver {
 
 	  @Override
 	  public void onRegister(double time, MapInfo map, List<AnimalInfo> animals) {
-		// TODO Auto-generated method stub
 		  SwingUtilities.invokeLater(() -> {viewer.reset(time, map, animals); pack(); });
 		
 	  }
 
 	  @Override
 	  public void onReset(double time, MapInfo map, List<AnimalInfo> animals) {
-		// TODO Auto-generated method stub
 		  SwingUtilities.invokeLater(() -> {viewer.reset(time, map, animals); pack();});
 		
 	  }
@@ -91,14 +82,11 @@ class MapWindow extends JFrame implements EcoSysObserver {
 	  }
 
 	  @Override
-	  public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) {
-		// TODO Auto-generated method stub
-		
+	  public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) { //TODO: Aqui si cambia 
 	  }
 
 	  @Override
 	  public void onAdvance(double time, MapInfo map, List<AnimalInfo> animals, double dt) {
-		// TODO Auto-generated method stub
 		  SwingUtilities.invokeLater(() -> viewer.update(animals, time));
 		
 	  }

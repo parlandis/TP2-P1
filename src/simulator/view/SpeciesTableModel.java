@@ -17,43 +17,41 @@ import simulator.model.State;
 
 class SpeciesTableModel extends AbstractTableModel implements EcoSysObserver {
 
-	private static final long serialVersionUID = 1L;
-
-	private List<String> _species;
-	private Map<String, Map<State, Integer>> _data;
+	private List<String> species;
+	private Map<String, Map<State, Integer>> data;
 
 	SpeciesTableModel(Controller ctrl) {
-		_species = new ArrayList<>();
-		_data = new HashMap<>();
+		species = new ArrayList<>();
+		data = new HashMap<>();
 		ctrl.addObserver(this);
 	}
 
 	private void update(List<AnimalInfo> animals) {
-		_species.clear();
-		_data.clear();
+		species.clear();
+		data.clear();
 
 		for (AnimalInfo a : animals) {
 			String g = a.getGeneticCode();
-			if (!_data.containsKey(g)) {
-				_species.add(g);
+			if (!data.containsKey(g)) {
+				species.add(g);
 				Map<State, Integer> statesCount = new HashMap<>();
 				// Inicializar todos los estados posibles a 0 dinámicamente
 				for (State s : State.values()) {
 					statesCount.put(s, 0);
 				}
-				_data.put(g, statesCount);
+				data.put(g, statesCount);
 			}
-			Map<State, Integer> counts = _data.get(g);
+			Map<State, Integer> counts = data.get(g);
 			counts.put(a.getState(), counts.get(a.getState()) + 1);
 		}
 
-		Collections.sort(_species);
+		Collections.sort(species);
 		fireTableDataChanged();
 	}
 
 	@Override
 	public int getRowCount() {
-		return _species.size();
+		return species.size();
 	}
 
 	@Override
@@ -74,12 +72,12 @@ class SpeciesTableModel extends AbstractTableModel implements EcoSysObserver {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		String speciesName = _species.get(rowIndex);
+		String speciesName = species.get(rowIndex);
 		if (columnIndex == 0) {
 			return speciesName;
 		} else {
 			State state = State.values()[columnIndex - 1];
-			return _data.get(speciesName).get(state);
+			return data.get(speciesName).get(state);
 		}
 	}
 

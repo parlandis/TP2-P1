@@ -13,43 +13,41 @@ import simulator.model.MapInfo;
 import simulator.model.RegionInfo;
 
 class RegionsTableModel extends AbstractTableModel implements EcoSysObserver {
-
-	  // TODO definir atributos necesarios
-
-	private List<MapInfo.RegionData> _regions;
-	private String[] _columnNames = { "Row", "Col", "Desc.", "Carnivore", "Herbivore" };
+	
+	private List<MapInfo.RegionData> regions;
+	private String[] columnNames = { "Row", "Col", "Desc.", "Carnivore", "Herbivore" };
 
 	RegionsTableModel(Controller ctrl) {
-		_regions = new ArrayList<>();
+		regions = new ArrayList<>();
 		ctrl.addObserver(this);
 	}
 
 	private void update(MapInfo map) {
-		_regions.clear();
+		regions.clear();
 		for (MapInfo.RegionData rd : map) {
-			_regions.add(rd);
+			regions.add(rd);
 		}
 		fireTableDataChanged();
 	}
 
 	@Override
 	public int getRowCount() {
-		return _regions.size();
+		return regions.size();
 	}
 
 	@Override
 	public int getColumnCount() {
-		return _columnNames.length;
+		return columnNames.length;
 	}
 
 	@Override
 	public String getColumnName(int col) {
-		return _columnNames[col];
+		return columnNames[col];
 	}
 
 	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		MapInfo.RegionData rd = _regions.get(rowIndex);
+	public Object getValueAt(int rowIndex, int columnIndex) {  
+		MapInfo.RegionData rd = regions.get(rowIndex);
 		switch (columnIndex) {
 		case 0:
 			return rd.row();

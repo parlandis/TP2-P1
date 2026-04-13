@@ -19,8 +19,6 @@ import simulator.model.MapInfo;
 import simulator.model.RegionInfo;
 
 class StatusBar extends JPanel implements EcoSysObserver {
-
-	// TODO Añadir los atributos necesarios.
 	private Controller ctrl;
 	private double time;
 	private int numAnimals;
@@ -35,7 +33,6 @@ class StatusBar extends JPanel implements EcoSysObserver {
 
 	StatusBar(Controller ctrl) {
 		initGUI();
-		// TODO registrar this como observador
 		this.ctrl = ctrl;
 		this.ctrl.addObserver(this);
 
@@ -66,19 +63,11 @@ class StatusBar extends JPanel implements EcoSysObserver {
 		this.add(s);
 		dimensionLabel = new JLabel("Dimension: 0x0 (0x0)");
 		this.add(dimensionLabel);
-		
-		
-		// TODO Crear varios JLabel para el tiempo, el número de animales, y la
-		// dimensión y añadirlos al panel. Puedes utilizar el siguiente código
-		// para añadir un separador vertical:
-		//
-
 	}
 
 
 	@Override
-	public void onRegister(double time, MapInfo map, List<AnimalInfo> animals) {
-		// TODO Auto-generated method stub
+	public void onRegister(double time, MapInfo map, List<AnimalInfo> animals) { //Actualiza el observador con la informacion inicial del mapa y los animales
 		timeLabel.setText("Time:" + String.format("%.3f", time));
 		animalsLabel.setText("Total Animals:" + animals.size());
 		dimensionLabel.setText("Dimensions:" + map.getWidth() + "x" + map.getHeight() + " (" + map.getCols() + "x" + map.getRows() + ")");
@@ -86,8 +75,7 @@ class StatusBar extends JPanel implements EcoSysObserver {
 	}
 
 	@Override
-	public void onReset(double time, MapInfo map, List<AnimalInfo> animals) {
-		// TODO Auto-generated method stub
+	public void onReset(double time, MapInfo map, List<AnimalInfo> animals) { // Actualiza el observador con la informacion del mapa y los animales después de un reset
 		timeLabel.setText("Time:" + String.format("%.3f", time));
 		animalsLabel.setText("Total Animals: " + animals.size());
 		dimensionLabel.setText("Dimensions: " + map.getWidth() + "x" + map.getHeight() + " (" + map.getCols() + "x" + map.getRows() + ")");
@@ -95,26 +83,21 @@ class StatusBar extends JPanel implements EcoSysObserver {
 	}
 
 	@Override
-	public void onAnimalAdded(double time, MapInfo map, List<AnimalInfo> animals, AnimalInfo a) {
-		// TODO Auto-generated method stub
+	public void onAnimalAdded(double time, MapInfo map, List<AnimalInfo> animals, AnimalInfo a) { // Actualiza al añadio animal
 		animalsLabel.setText("Total Animals:" + animals.size());
-
 	}
 
 	@Override
-	public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) {
-		//TODO: este no modifica 
-
+	public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) { 
+		//TODO: aqui creo que nada 
 	}
 
 	@Override
 	public void onAdvance(double time, MapInfo map, List<AnimalInfo> animals, double dt) {
-		// TODO Auto-generated method stub
 		timeLabel.setText("Time:" + String.format("%.3f", time));
 		animalsLabel.setText("Total Animals:" + animals.size());
 		
 
 	}
 
-	// TODO el resto de métodos van aquí…
 }

@@ -40,11 +40,12 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 	  ChangeRegionsDialog(Controller ctrl) {  
 	    super((Frame)null, true);  
 	    this.ctrl = ctrl;  
+	    this.ctrl.addObserver(this);
 	    initGUI();  
-	    // TODO registrar this como observer;  
 	  }
 
 	  public ChangeRegionsDialog(ControlPanel controlPanel) { // TODO No se si hau que crear aeste constructor
+		  
 		
 	  }
 

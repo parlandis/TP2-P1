@@ -35,8 +35,6 @@ class ControlPanel extends JPanel {
 
 	private boolean stopped = true; // utilizado en los botones de run/stop
 
-	// TODO añade más atributos aquí …
-
 	ControlPanel(Controller ctrl) {
 		this.ctrl = ctrl;
 		initGUI();
@@ -97,7 +95,7 @@ class ControlPanel extends JPanel {
 
 		// Pasos (Steps)
 		this.toolaBar.add(new JLabel(" Steps: "));
-		this.steps = new JSpinner(new SpinnerNumberModel(10000, 1, 100000, 100));
+		this.steps = new JSpinner(new SpinnerNumberModel(10000, 1, 100000, 100)); // MArcamos valor ini, minimo, maximo y variacion
 		this.steps.setMinimumSize(new Dimension(80, 30));
 		this.steps.setPreferredSize(new Dimension(80, 30));
 		this.steps.setMaximumSize(new Dimension(80, 30));
