@@ -22,7 +22,7 @@ public class DefaultRegion extends Region {
 
 	@Override
 	public String toString() {
-		return "Infinite food supply";
+		return "Default";
 	}
 
 }

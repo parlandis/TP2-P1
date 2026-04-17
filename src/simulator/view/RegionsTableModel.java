@@ -10,13 +10,13 @@ import simulator.model.AnimalInfo;
 import simulator.model.Diet;
 import simulator.model.EcoSysObserver;
 import simulator.model.MapInfo;
+import simulator.model.MapInfo.RegionData;
 import simulator.model.RegionInfo;
 
 class RegionsTableModel extends AbstractTableModel implements EcoSysObserver {
 	
-	private List<MapInfo.RegionData> regions;
-	private String[] columnNames = { "Row", "Col", "Desc.", "Carnivore", "Herbivore" };
-
+	private List<RegionData> regions;
+	
 	RegionsTableModel(Controller ctrl) {
 		regions = new ArrayList<>();
 		ctrl.addObserver(this);
@@ -24,7 +24,7 @@ class RegionsTableModel extends AbstractTableModel implements EcoSysObserver {
 
 	private void update(MapInfo map) {
 		regions.clear();
-		for (MapInfo.RegionData rd : map) {
+		for (RegionData rd : map) {
 			regions.add(rd);
 		}
 		fireTableDataChanged();
@@ -37,17 +37,26 @@ class RegionsTableModel extends AbstractTableModel implements EcoSysObserver {
 
 	@Override
 	public int getColumnCount() {
-		return columnNames.length;
+		return 3 + Diet.values().length;
 	}
 
 	@Override
 	public String getColumnName(int col) {
-		return columnNames[col];
+		switch (col) {
+		case 0:
+			return "Row";
+		case 1:
+			return "Col";
+		case 2:
+			return "Desc.";
+		default:
+			return Diet.values()[col - 3].name();
+		}
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {  
-		MapInfo.RegionData rd = regions.get(rowIndex);
+		RegionData rd = regions.get(rowIndex);
 		switch (columnIndex) {
 		case 0:
 			return rd.row();
@@ -55,12 +64,8 @@ class RegionsTableModel extends AbstractTableModel implements EcoSysObserver {
 			return rd.col();
 		case 2:
 			return rd.r().toString();
-		case 3:
-			return countAnimals(rd.r(), Diet.CARNIVORE);
-		case 4:
-			return countAnimals(rd.r(), Diet.HERBIVORE);
 		default:
-			return null;
+			return countAnimals(rd.r(), Diet.values()[columnIndex - 3]);
 		}
 	}
 

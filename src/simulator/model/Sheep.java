@@ -5,7 +5,7 @@ import simulator.misc.Vector2D;
 
 public class Sheep extends Animal {
 	// Constantes
-	final static String SHEEP_GENETIC_CODE = "Sheep";
+	final static String SHEEP_GENETIC_CODE = "Oveja";
 	final static double INIT_SIGHT_SHEEP = 40.0;
 	final static double INIT_SPEED_SHEEP = 35.0;
 	final static double BOOST_FACTOR_SHEEP = 2.0;
@@ -34,7 +34,7 @@ public class Sheep extends Animal {
 	@Override
 	public void update(double dt) {
 		switch (state) {
-			// 1 
+			// 1
 			case DEAD:
 				return;
 			// 2
@@ -92,7 +92,7 @@ public class Sheep extends Animal {
 		}
 
 		// 1.2
-		move(speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR)); 
+		move(speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR));
 		this.age += dt;
 		this.energy -= FOOD_DROP_RATE_SHEEP * dt;
 		this.desire += DESIRE_INCREASE_RATE_SHEEP * dt;
@@ -101,7 +101,8 @@ public class Sheep extends Animal {
 		// 2
 		// 2.1
 		if (dangerSource == null) {
-			dangerSource = dangerStrategy.select(this, this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
+			dangerSource = dangerStrategy.select(this,
+					this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
 		}
 
 		if (dangerSource != null) {
@@ -136,7 +137,8 @@ public class Sheep extends Animal {
 		// 3)
 		if (dangerSource == null || dangerSource.getPosition().distanceTo(pos) > this.sightRange) {
 			// 3.1)
-			dangerSource = dangerStrategy.select(this,this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
+			dangerSource = dangerStrategy.select(this,
+					this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
 
 			// 3.1.b)
 			if (dangerSource == null) {
@@ -154,14 +156,16 @@ public class Sheep extends Animal {
 
 	protected void doMate(double dt) {
 		// 1)
-		if (mateTarget != null && (mateTarget.getState() == State.DEAD || mateTarget.getPosition().distanceTo(pos) > this.sightRange)) {
+		if (mateTarget != null && (mateTarget.getState() == State.DEAD
+				|| mateTarget.getPosition().distanceTo(pos) > this.sightRange)) {
 			mateTarget = null;
 		}
 		// 2)
 		if (mateTarget == null) {
-			mateTarget = this.mateStrategy.select(this, this.regionMngr.getAnimalsInRange(this, a -> a.getGeneticCode().equals(SHEEP_GENETIC_CODE)));
+			mateTarget = this.mateStrategy.select(this,
+					this.regionMngr.getAnimalsInRange(this, a -> a.getGeneticCode().equals(SHEEP_GENETIC_CODE)));
 			if (mateTarget == null) {
-				move(speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR)); 
+				move(speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR));
 			}
 		} else {
 			// 2.1)
@@ -187,7 +191,8 @@ public class Sheep extends Animal {
 		}
 		// 3)
 		if (dangerSource == null) {
-			dangerSource = dangerStrategy.select(this,this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
+			dangerSource = dangerStrategy.select(this,
+					this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.CARNIVORE));
 		}
 		if (dangerSource != null) {
 			setState(State.DANGER);

@@ -56,7 +56,6 @@ class SpeciesTableModel extends AbstractTableModel implements EcoSysObserver {
 
 	@Override
 	public int getColumnCount() {
-		// 1 para 'Species' + el número de estados en el enum
 		return 1 + State.values().length;
 	}
 
