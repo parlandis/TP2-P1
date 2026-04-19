@@ -105,7 +105,6 @@ public class Controller {
 	}
 
 	public void run(double t, double dt, boolean sv, OutputStream out) {
-		// ... existing run implementation ...
 		JSONObject initState = sim.asJSON();
 
 		SimpleObjectViewer view = null;
@@ -130,8 +129,7 @@ public class Controller {
 		PrintStream ps = new PrintStream(out);
 		ps.println(salida.toString(2));
 
-		if (sv)
-			view.close();
+		if (sv) view.close();
 	}
 
 }

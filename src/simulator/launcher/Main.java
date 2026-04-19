@@ -291,7 +291,7 @@ public class Main {
 			ctrl = new Controller(sim);
 			ctrl.loadData(json);
 		} else {
-			sim = new Simulator(15, 20, 800, 600, _animalFactory, _regionFactory);
+			sim = new Simulator(20, 15, 800, 600, _animalFactory, _regionFactory);
 			ctrl = new Controller(sim);
 		}
 		

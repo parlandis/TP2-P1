@@ -45,8 +45,8 @@ class SpeciesTableModel extends AbstractTableModel implements EcoSysObserver {
 			counts.put(a.getState(), counts.get(a.getState()) + 1);
 		}
 
-		Collections.sort(species);
-		fireTableDataChanged();
+		Collections.sort(species); // Ordenar alfabéticamente las especies
+		fireTableDataChanged(); // Notificar a la tabla que los datos han cambiado para que se actualice la vista
 	}
 
 	@Override

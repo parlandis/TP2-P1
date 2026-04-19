@@ -30,24 +30,17 @@ class MapWindow extends JFrame implements EcoSysObserver {
 
 	  private void intiGUI() {  
 	    JPanel mainPanel = new JPanel(new BorderLayout());  
-	    
-	    
 	    setContentPane(mainPanel);
-	    
 	    viewer = new MapViewer();
 	    mainPanel.add(viewer, BorderLayout.CENTER);
-
-	    
+	    // Window listener para controlar el cierre de la ventana y eliminar el observador
 	    addWindowListener(new java.awt.event.WindowAdapter() {
 	        @Override
 	        public void windowClosing(java.awt.event.WindowEvent e) {
 	            ctrl.removeObserver(MapWindow.this);
 	        }
 	    });
-	    
-	    
-
-
+	    // Configuración de la ventana
 	    pack();
 	    if (this.parent != null)
 	      setLocation(
@@ -57,13 +50,10 @@ class MapWindow extends JFrame implements EcoSysObserver {
 	      setVisible(true);  
 	  }  
 	  
-	  void addWindowListener() {
-		  
-	  }
 
 	  @Override
 	  public void onRegister(double time, MapInfo map, List<AnimalInfo> animals) {
-		  SwingUtilities.invokeLater(() -> {viewer.reset(time, map, animals); pack(); });
+		  SwingUtilities.invokeLater(() -> {viewer.reset(time, map, animals); pack(); });  // Para asegurar que la actualización de la vista se realice en el hilo de eventos de Swing
 		
 	  }
 
@@ -76,14 +66,10 @@ class MapWindow extends JFrame implements EcoSysObserver {
 	  @Override
 	  public void onAnimalAdded(double time, MapInfo map, List<AnimalInfo> animals, AnimalInfo a) {
 		    SwingUtilities.invokeLater(() -> viewer.update(animals, time));
-	  
-		
 	  }
 
 	  @Override
-	  public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) { //TODO: Aqui si cambia 
-		  
-		  
+	  public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) {
 	  }
 
 	  @Override

@@ -41,7 +41,7 @@ class RegionsTableModel extends AbstractTableModel implements EcoSysObserver {
 	}
 
 	@Override
-	public String getColumnName(int col) {
+	public String getColumnName(int col) { //Cogemos el valor de la columna, directamente usando el enum diet 
 		switch (col) {
 		case 0:
 			return "Row";
@@ -55,7 +55,7 @@ class RegionsTableModel extends AbstractTableModel implements EcoSysObserver {
 	}
 
 	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {  
+	public Object getValueAt(int rowIndex, int columnIndex) {  // Devuelve el valor de la celda en la posición especificada por rowIndex y columnIndex
 		RegionData rd = regions.get(rowIndex);
 		switch (columnIndex) {
 		case 0:

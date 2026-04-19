@@ -1,6 +1,5 @@
 package simulator.view;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.util.List;
@@ -61,57 +60,59 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		setContentPane(mainPanel);
 
-		// Primer panel de ayuda
-		JPanel ayuda = new JPanel();
-		ayuda.add(new JLabel("Selecciona un tipo de region, un intervalo de filas/columnas y provee valores para los parametros.\n"));
-		mainPanel.add(ayuda);
+		// 1. Ayuda
+		JPanel helpPanel = new JPanel();
+		helpPanel.setAlignmentX(CENTER_ALIGNMENT);
+		JLabel helpLabel = new JLabel(
+				"<html>Select a region type, the rows/cols interval, and provide values for the parametes in the <b>Value column</b> (default values are used for parametes with no value).</html>");
+		helpPanel.add(helpLabel);
+		mainPanel.add(helpPanel);
 
-		// this.regionsInfo se usará para establecer la información en la tabla
+		// 2. Tabla de parametros
 		this.regionsInfo = Main._regionFactory.getInfo();
-
-		// this.dataTableModel es un modelo de tabla que incluye todos los parámetros de la region
 		this.dataTableModel = new DefaultTableModel() {
-			private static final long serialVersionUID = 1L;
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return column == 1;
 			}
 		};
 		this.dataTableModel.setColumnIdentifiers(this.headers);
-		JTable dataTable = new JTable(this.dataTableModel);
-		JScrollPane tableScroll = new JScrollPane(dataTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		tableScroll.setPreferredSize(new Dimension(600, 200));
 
-		mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+		JTable dataTable = new JTable(this.dataTableModel);
+		JScrollPane tableScroll = new JScrollPane(dataTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		tableScroll.setPreferredSize(new Dimension(650, 250));
 		mainPanel.add(tableScroll);
 
-		// Panel de seleccion
-		JPanel seleccion = new JPanel();
-		mainPanel.add(seleccion);
+		// 3. Selectores
+		JPanel selectorsPanel = new JPanel();
+		selectorsPanel.setPreferredSize(new Dimension(700, 50));
+		mainPanel.add(selectorsPanel);
 
+		// Region type
 		regionsInfo.forEach(info -> this.regionsModel.addElement(info.getString("type")));
-
 		JComboBox<String> regionType = new JComboBox<>(this.regionsModel);
-		seleccion.add(new JLabel("Region Type: "));
-		seleccion.add(regionType);
+		selectorsPanel.add(new JLabel("Region type: "));
+		selectorsPanel.add(regionType);
 
-		// Se inicializan dinámicamente en updateCoordinateModels a través del observador
-		
+		// Row from/to
 		JComboBox<String> fromRow = new JComboBox<>(this.fromRowModel);
-		seleccion.add(new JLabel("From Row: "));
-		seleccion.add(fromRow);
 		JComboBox<String> toRow = new JComboBox<>(this.toRowModel);
-		seleccion.add(new JLabel("To Row: "));
-		seleccion.add(toRow);
-		JComboBox<String> fromCol = new JComboBox<>(this.fromColModel);
-		seleccion.add(new JLabel("From Col: "));
-		seleccion.add(fromCol);
-		JComboBox<String> toCol = new JComboBox<>(this.toColModel);
-		seleccion.add(new JLabel("To Col: "));
-		seleccion.add(toCol);
+		selectorsPanel.add(new JLabel("Row from/to: "));
+		selectorsPanel.add(fromRow);
+		selectorsPanel.add(toRow);
 
-		// Panel de botones
-		JPanel botones = new JPanel();
+		// Column from/to
+		JComboBox<String> fromCol = new JComboBox<>(this.fromColModel);
+		JComboBox<String> toCol = new JComboBox<>(this.toColModel);
+		selectorsPanel.add(new JLabel("Column from/to: "));
+		selectorsPanel.add(fromCol);
+		selectorsPanel.add(toCol);
+
+		// 4. Botones
+		JPanel buttonPanel = new JPanel();
+		mainPanel.add(buttonPanel);
+
 		JButton ok = new JButton("OK");
 		ok.addActionListener((e) -> {
 			try {
@@ -120,8 +121,8 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 				int fCol = Integer.parseInt((String) fromCol.getSelectedItem());
 				int tCol = Integer.parseInt((String) toCol.getSelectedItem());
 
-				if (fRow > tRow || fCol > tCol) {
-					JOptionPane.showMessageDialog(this, "Debe ser Row/Col inicio <= Row/Col fin", "Error", JOptionPane.ERROR_MESSAGE);
+				if (fRow > tRow || fCol > tCol || fRow < 0 || fCol < 0) {
+					ViewUtils.showErrorMsg(this, "Debe ser Row/Col inicio <= Row/Col fin y no negativos");
 					return;
 				}
 
@@ -156,28 +157,28 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 				status = 1;
 				setVisible(false);
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				ViewUtils.showErrorMsg(this, ex.getMessage());
 			}
 		});
+
 		JButton cancel = new JButton("Cancel");
 		cancel.addActionListener((e) -> {
 			status = 0;
 			setVisible(false);
 		});
-		botones.add(ok);
-		botones.add(cancel);
-		mainPanel.add(botones);
+
+		buttonPanel.add(cancel);
+		buttonPanel.add(ok);
 
 		regionType.addActionListener((e) -> {
 			updateTableModel((String) regionType.getSelectedItem());
 		});
 
-		// Inicializar tabla con el primer tipo
 		if (regionsModel.getSize() > 0) {
 			updateTableModel((String) regionsModel.getElementAt(0));
 		}
 
-		setPreferredSize(new Dimension(700, 400));
+		setPreferredSize(new Dimension(750, 450));
 		pack();
 		setResizable(false);
 		setVisible(false);

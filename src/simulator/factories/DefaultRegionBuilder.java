@@ -18,9 +18,6 @@ public class DefaultRegionBuilder extends Builder<Region> {
 
 	@Override
 	protected void fillInData(JSONObject o) {
-		o.put("type", "default");
-		o.put("desc", "Infinite food supply");
-		o.put("data", new JSONObject());
 	}
 
 }

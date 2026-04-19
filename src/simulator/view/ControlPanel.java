@@ -45,11 +45,11 @@ class ControlPanel extends JPanel {
 		toolaBar = new JToolBar();
 		add(toolaBar, BorderLayout.PAGE_START);
 
-		// Inicializar JFileChooser
+		// inicializamos el JFileChooser
 		this.fc = new JFileChooser();
 		this.fc.setCurrentDirectory(new File(System.getProperty("user.dir") + "/resources/examples"));
 
-		// Inicializar ChangeRegionsDialog
+		// inicializamos ChangeRegionsDialog
 		this.changeRegionsDialog = new ChangeRegionsDialog(this.ctrl);
 
 		// Botón Open
@@ -95,7 +95,8 @@ class ControlPanel extends JPanel {
 
 		// Pasos (Steps)
 		this.toolaBar.add(new JLabel(" Steps: "));
-		this.steps = new JSpinner(new SpinnerNumberModel(10000, 1, 100000, 100)); // MArcamos valor ini, minimo, maximo y variacion
+		this.steps = new JSpinner(new SpinnerNumberModel(10000, 1, 10000, 100)); // Marcamos valor ini, minimo, maximo y paso (incremento/decremento)
+		this.steps.setToolTipText("Simulation steps to run: 1 - 10000");
 		this.steps.setMinimumSize(new Dimension(80, 30));
 		this.steps.setPreferredSize(new Dimension(80, 30));
 		this.steps.setMaximumSize(new Dimension(80, 30));
@@ -103,19 +104,20 @@ class ControlPanel extends JPanel {
 
 		// Delta-Time
 		this.toolaBar.add(new JLabel(" Delta-Time: "));
-		this.dt = new JTextField(Main.deltaTime != null ? Main.deltaTime.toString() : "0.03");
+		this.dt = new JTextField(Main.deltaTime != null ? Main.deltaTime.toString() : "0.03"); // Si Main.deltaTime es// null, se pone 0.03 																							// por defecto
+		this.dt.setToolTipText("Real time (in seconds) corresponding to a step");
 		this.dt.setMinimumSize(new Dimension(80, 30));
 		this.dt.setPreferredSize(new Dimension(80, 30));
 		this.dt.setMaximumSize(new Dimension(80, 30));
 		this.toolaBar.add(this.dt);
 
 		// Quit Button
-		this.toolaBar.add(Box.createGlue());
+		this.toolaBar.add(Box.createGlue()); // Para que el botón de salir se quede a la derecha
 		this.toolaBar.addSeparator();
 		this.quitButton = new JButton();
 		this.quitButton.setToolTipText("Quit");
 		this.quitButton.setIcon(new ImageIcon("resources/icons/exit.png"));
-		this.quitButton.addActionListener((e) -> ViewUtils.quit(this));
+		this.quitButton.addActionListener((e) -> ViewUtils.quit(this)); // Cierra la ventana actual (y por tanto la aplicación, al ser la ventana principal)
 		this.toolaBar.add(quitButton);
 	}
 
@@ -125,7 +127,7 @@ class ControlPanel extends JPanel {
 			File f = this.fc.getSelectedFile();
 			try {
 				InputStream in = new FileInputStream(f);
-				JSONObject json = new JSONObject(new JSONTokener(in));
+				JSONObject json = new JSONObject(new JSONTokener(in)); // Cargamos el JSON del fichero
 				in.close();
 				int width = json.optInt("width", 800);
 				int height = json.optInt("height", 600);
@@ -141,7 +143,7 @@ class ControlPanel extends JPanel {
 
 	private void startSim() {
 		this.stopped = false;
-		setButtonsEnabled(false);
+		setButtonsEnabled(false); // Desactivamos los botones mientras se ejecuta la simulación (excepto el de stop)
 		try {
 			int n = (Integer) this.steps.getValue();
 			double delta = Double.parseDouble(this.dt.getText());
@@ -168,7 +170,7 @@ class ControlPanel extends JPanel {
 		if (n > 0 && !this.stopped) {
 			try {
 				this.ctrl.advance(dt);
-				SwingUtilities.invokeLater(() -> runSim(n - 1, dt));
+				SwingUtilities.invokeLater(() -> runSim(n - 1, dt)); // Llamamos a runSim de nuevo con n-1 pasos, pero lo hacemos en el hilo de la interfaz gráfica para evitar bloquearla
 			} catch (Exception e) {
 				ViewUtils.showErrorMsg(e.getMessage());
 				this.stopped = true;

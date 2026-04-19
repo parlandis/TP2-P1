@@ -21,10 +21,10 @@ public class InfoTable extends JPanel {
 	}
 
 	private void initGUI() {
-		this.setLayout(new BorderLayout());
-		this.setBorder(BorderFactory.createTitledBorder(this.title));
+		this.setLayout(new BorderLayout()); //cambiar el layout del panel a BorderLayout()  
+		this.setBorder(BorderFactory.createTitledBorder(this.title));  // añadir un borde con título al JPanel, con el texto this.title
 		
-		JTable tabla = new JTable(this.tableModel);
+		JTable tabla = new JTable(this.tableModel); // crear una nueva tabla JTable utilizando el modelo de tabla this.tableModel con desplazamiento vertical
 		this.add(new JScrollPane(tabla), BorderLayout.CENTER);
 	}
 }

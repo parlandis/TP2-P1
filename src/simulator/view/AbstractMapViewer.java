@@ -7,7 +7,6 @@ import javax.swing.JComponent;
 import simulator.model.AnimalInfo;
 import simulator.model.MapInfo;
 
-@SuppressWarnings("serial")
 public abstract class AbstractMapViewer extends JComponent {
 
 	public abstract void update(List<AnimalInfo> objs, Double time);

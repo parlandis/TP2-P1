@@ -2,16 +2,12 @@ package simulator.view;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
-import javax.swing.SwingUtilities;
-
-
 import simulator.control.Controller;
 import simulator.model.AnimalInfo;
 import simulator.model.EcoSysObserver;
@@ -71,7 +67,6 @@ class StatusBar extends JPanel implements EcoSysObserver {
 		timeLabel.setText("Time:" + String.format("%.3f", time));
 		animalsLabel.setText("Total Animals:" + animals.size());
 		dimensionLabel.setText("Dimensions:" + map.getWidth() + "x" + map.getHeight() + " (" + map.getCols() + "x" + map.getRows() + ")");
-
 	}
 
 	@Override
@@ -79,7 +74,6 @@ class StatusBar extends JPanel implements EcoSysObserver {
 		timeLabel.setText("Time:" + String.format("%.3f", time));
 		animalsLabel.setText("Total Animals: " + animals.size());
 		dimensionLabel.setText("Dimensions: " + map.getWidth() + "x" + map.getHeight() + " (" + map.getCols() + "x" + map.getRows() + ")");
-
 	}
 
 	@Override
@@ -88,16 +82,13 @@ class StatusBar extends JPanel implements EcoSysObserver {
 	}
 
 	@Override
-	public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) { 
-	 
+	public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) { //Aqui no se actualiza nada 
 	}
 
 	@Override
 	public void onAdvance(double time, MapInfo map, List<AnimalInfo> animals, double dt) {
 		timeLabel.setText("Time:" + String.format("%.3f", time));
 		animalsLabel.setText("Total Animals:" + animals.size());
-		
-
 	}
 
 }
