@@ -28,12 +28,15 @@ class ControlPanel extends JPanel {
 	private JSpinner steps; // Boton de flechas para subir o bajar el numero de pasos
 	private JTextField dt; // Para poder poner el valor de dt
 	private JFileChooser fc; // Es el explorador de archivos
+	
+	private JSpinner nuevo; // JSPinner para practica 3
 
 	private JButton mapButton; // Boton del mapa
 	private JButton runButton; // Boton de run
 	private JButton stopButton; // Boton de stop
 
-	private boolean stopped = true; // utilizado en los botones de run/stop
+	//private boolean stopped = true; // utilizado en los botones de run/stop
+	private volatile Thread hilo; // El hilo que usaremos 
 
 	ControlPanel(Controller ctrl) {
 		this.ctrl = ctrl;
@@ -88,10 +91,23 @@ class ControlPanel extends JPanel {
 		this.stopButton = new JButton();
 		this.stopButton.setToolTipText("Stop");
 		this.stopButton.setIcon(new ImageIcon("resources/icons/stop.png"));
-		this.stopButton.addActionListener((e) -> this.stopped = true);
+		this.stopButton.addActionListener((e) -> {
+			if(this.hilo != null) {
+				this.hilo.interrupt();
+			}
+		});
 		this.toolaBar.add(stopButton);
 
 		this.toolaBar.addSeparator();
+		
+		//Boton de delay
+		this.toolaBar.add(new JLabel("Delay: "));
+		this.nuevo = new JSpinner(new SpinnerNumberModel(1, 0, 1000, 1));
+		this.nuevo.setToolTipText("Delay 0-1000, 1 ");  // Definimos min: 0, max 1000 , tamaño de paso 1
+		this.nuevo.setMinimumSize(new Dimension(80, 30));
+		this.nuevo.setPreferredSize(new Dimension(80, 30));
+		this.nuevo.setMaximumSize(new Dimension(80, 30));
+		this.toolaBar.add(nuevo);
 
 		// Pasos (Steps)
 		this.toolaBar.add(new JLabel(" Steps: "));
@@ -142,15 +158,23 @@ class ControlPanel extends JPanel {
 	}
 
 	private void startSim() {
-		this.stopped = false;
+
 		setButtonsEnabled(false); // Desactivamos los botones mientras se ejecuta la simulación (excepto el de stop)
 		try {
 			int n = (Integer) this.steps.getValue();
 			double delta = Double.parseDouble(this.dt.getText());
-			runSim(n, delta);
+			int delay = (Integer) this.nuevo.getValue();
+			this.hilo = new Thread(() -> {
+				runSim(n, delta, delay);
+	            SwingUtilities.invokeLater(() -> setButtonsEnabled(true));
+	            this.hilo = null;
+			});
+			
+			this.hilo.start(); 
+			
+
 		} catch (Exception e) {
 			ViewUtils.showErrorMsg(e.getMessage());
-			this.stopped = true;
 			setButtonsEnabled(true);
 		}
 	}
@@ -165,7 +189,28 @@ class ControlPanel extends JPanel {
 		// this.quitButton.setEnabled(enabled); // Se suele dejar el de salir siempre
 		// activado (o el usuario puede elegir salir cuando sea)
 	}
+	
+	private void runSim(int n, double dt, int delay) {
+		while (n > 0 && !Thread.currentThread().isInterrupted()){
+			try {
+				ctrl.advance(dt);
+			} catch(Exception e) {
+				// TODO: handle exception
+			}
+			
+			try {
+				Thread.sleep(delay);
+			} catch (Exception e) {
+				// TODO: handle exception
+		        Thread.currentThread().interrupt();
+		        return;
+			}
+			
+			n--;
+		}
+	}
 
+	/*
 	private void runSim(int n, double dt) {
 		if (n > 0 && !this.stopped) {
 			try {
@@ -181,4 +226,5 @@ class ControlPanel extends JPanel {
 			setButtonsEnabled(true);
 		}
 	}
+	*/
 }

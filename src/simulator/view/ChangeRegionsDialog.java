@@ -4,14 +4,12 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.util.List;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -58,15 +56,15 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 		setTitle("Change Regions");
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		mainPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		setContentPane(mainPanel);
 
 		// 1. Ayuda
-		JPanel helpPanel = new JPanel();
-		helpPanel.setAlignmentX(CENTER_ALIGNMENT);
 		JLabel helpLabel = new JLabel(
-				"<html>Select a region type, the rows/cols interval, and provide values for the parametes in the <b>Value column</b> (default values are used for parametes with no value).</html>");
-		helpPanel.add(helpLabel);
-		mainPanel.add(helpPanel);
+				"<html>Select a region type, the rows/cols interval, and provide values for the parameters in the <b>Value column</b> (default values are used for parameters with no value).</html>");
+		helpLabel.setAlignmentX(CENTER_ALIGNMENT);
+		helpLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		mainPanel.add(helpLabel);
 
 		// 2. Tabla de parametros
 		this.regionsInfo = Main._regionFactory.getInfo();
@@ -86,7 +84,7 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 
 		// 3. Selectores
 		JPanel selectorsPanel = new JPanel();
-		selectorsPanel.setPreferredSize(new Dimension(700, 50));
+		selectorsPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		mainPanel.add(selectorsPanel);
 
 		// Region type
@@ -180,7 +178,7 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 
 		setPreferredSize(new Dimension(750, 450));
 		pack();
-		setResizable(false);
+		setResizable(true);
 		setVisible(false);
 	}
 
