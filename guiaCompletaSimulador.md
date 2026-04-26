@@ -1,23 +1,11 @@
-# 📚 Guía Completa del Proyecto: EcoSimulator
+# 📚 Guía Completa del Proyecto: EcoSimulator (Versión Extendida)
 
 > Simulador biológico de ecosistemas con interacción dinámica entre especies y regiones.  
-> Stack: **Java Swing**, patrón **MVC**, **Observer**, **Factory** y **Builder**.
+> Stack: **Java Swing**, patrón **MVC**, **Observer**, **Factory**, **Builder** y **Strategy**.
 
 ---
 
-## 📋 Índice
-
-1. [Arquitectura General](#arquitectura-general)
-2. [Modelo — El Motor Biológico](#modelo)
-3. [Control — El Puente](#control)
-4. [Vista — Interfaz Gráfica (GUI)](#vista)
-5. [Factorías y Builders](#factorias)
-6. [Flujos de Datos Principales](#flujos)
-7. [Puesta en Marcha](#puesta-en-marcha)
-
----
-
-## 🏗️ Arquitectura General {#arquitectura-general}
+## 🏗️ 1. Arquitectura General {#arquitectura-general}
 
 El proyecto sigue una arquitectura **MVC (Modelo-Vista-Controlador)** desacoplada mediante un patrón **Observer**.
 
@@ -46,68 +34,79 @@ graph TB
 
 | Capa | Paquete | Responsabilidad |
 |------|---------|-----------------|
-| **Presentación** | `view/` | Interfaz Swing. Escucha cambios del modelo mediante `EcoSysObserver`. |
-| **Control** | `control/` | Gestiona el flujo de la simulación y la carga de datos. No tiene lógica biológica. |
 | **Modelo** | `model/` | Contiene la lógica del ecosistema, las leyes biológicas y el estado de la simulación. |
+| **Control** | `control/` | Gestiona el flujo de la simulación y la carga de datos. No tiene lógica biológica. |
+| **Vista** | `view/` | Interfaz Swing. Escucha cambios del modelo mediante `EcoSysObserver`. |
+
+### Patrones de Diseño Detallados
+- **Observer**: `EcoSysObserver` permite que las vistas se actualicen automáticamente sin que el modelo las conozca directamente.
+- **Factory Method + Builder**: Centraliza la creación de entidades desde JSON.
+- **Strategy**: Utilizado en `SelectionStrategy` para que los animales elijan pareja/presa de forma intercambiable (`SelectClosest`, `SelectFirst`, `SelectYoungest`).
+- **State**: Los animales gestionan su comportamiento mediante un estado interno (`NORMAL`, `HUNGER`, `MATE`, `DANGER`, `DEAD`).
 
 ---
 
-## 🗄️ Modelo — El Motor Biológico {#modelo}
+## 🧬 2. Modelo — El Motor Biológico {#modelo}
 
 ### Componentes Clave
 
 | Clase | Responsabilidad |
 |-------|-----------------|
-| `Simulator` | Clase principal del modelo. Gestiona el tiempo (`time`) y la lista de animales y regiones. |
-| `RegionManager` | Gestiona la cuadrícula de regiones y distribuye a los animales en sus respectivas celdas. |
-| `Animal` | Clase abstracta base. Define el comportamiento de los animales (ovejas, lobos). |
-| `Region` | Representa una celda del mapa con una cantidad de comida propia. |
+| `Simulator` | Orquestador principal. Gestiona el tiempo (`time`) y coordina el paso de simulación. |
+| `RegionManager` | Gestiona la cuadrícula de regiones y la localización espacial de los animales. |
+| `Animal` | Clase abstracta base que define atributos comunes (energía, edad, posición, velocidad). |
+| `Region` | Representa una celda del mapa que provee alimento a los animales. |
+
+### Lógica del Paso de Simulación (`advance`)
+1. **Eliminar muertos**: Se quitan de la lista los animales en estado `DEAD`.
+2. **Actualizar animales**: Cada animal ejecuta su `update(dt)` (movimiento, cambio de estado, gasto de energía).
+3. **Actualizar posiciones**: El `RegionManager` comprueba si un animal ha cambiado de celda.
+4. **Actualizar regiones**: Las regiones regeneran comida o aplican sus reglas.
+5. **Nacimientos**: Se procesan los animales recién nacidos (`deliverBaby()`).
+6. **Notificar**: Se llama a los observadores para refrescar la GUI.
 
 ### Jerarquía de Animales y Estados
-Los animales pueden estar en diferentes estados definidos en `State.java`:
-- `NORMAL`
-- `HUNGER`
-- `DANGER`
-- `DEAD`
+- `Sheep`: Herbívoro. Teme a los carnívoros (`DANGER`), busca pareja (`MATE`) y come de la región.
+- `Wolf`: Carnívoro. Busca presas cuando tiene hambre (`HUNGER`), busca pareja y no tiene depredadores.
 
 ---
 
-## 🔌 Control — El Puente {#control}
+## 🔌 3. Control — El Puente {#control}
 
 ### `Controller.java`
 Es la única vía que tienen las vistas para comunicarse con el simulador.
 
 | Método | Descripción |
 |--------|-------------|
-| `loadData(JSONObject)` | Carga regiones y animales desde un JSON. |
-| `advance(double dt)` | Avanza la simulación un paso de tiempo. |
-| `reset(cols, rows, ...)` | Reinicia el simulador con nuevas dimensiones. |
+| `loadData(JSONObject)` | Itera sobre el JSON para configurar regiones y animales. |
+| `advance(double dt)` | Ordena al simulador avanzar un paso. |
+| `reset(cols, rows, ...)` | Reinicia el mundo con nuevas dimensiones. |
 | `addObserver(EcoSysObserver)` | Registra una vista para recibir actualizaciones. |
 
 ---
 
-## 🖥️ Vista — Interfaz Gráfica (GUI) {#vista}
+## 🖥️ 4. Vista — Interfaz Gráfica (GUI) {#vista}
 
 ### Componentes Principales
 
 | Vista | Descripción |
 |-------|-------------|
-| `MainWindow` | Ventana principal que organiza todos los paneles. |
-| `ControlPanel` | Barra de herramientas con botones: Abrir (Open), Mapa (Map), Ejecutar (Run), Detener (Stop) y Salir (Exit). |
-| `MapWindow` | Ventana secundaria que muestra el mapa visualmente. Contiene un `MapViewer`. |
-| `MapViewer` | Se encarga del dibujo técnico: cuadrícula de regiones, círculos para animales y textos de ayuda. |
-| `StatusBar` | Barra inferior que muestra el tiempo actual y el número de animales. |
+| `MainWindow` | Frame principal (JFrame) que organiza los paneles. |
+| `ControlPanel` | Barra con botones (`Open`, `Map`, `Run`, `Stop`, `Exit`) y spinner de pasos. |
+| `MapWindow` | Ventana secundaria que contiene el `MapViewer`. |
+| `MapViewer` | Dibujo técnico sobre un `JPanel`. Renderiza la rejilla y los animales. |
+| `StatusBar` | Muestra el tiempo, número de animales y mensajes informativos. |
 
-### Modelos de Tabla
-Las tablas se actualizan automáticamente gracias al patrón Observer:
-- `SpeciesTableModel`: Muestra estadísticas por especie (código, dieta, estado).
-- `RegionsTableModel`: Muestra info de cada celda (fila, columna, tipo de región, animales).
+### Modelos de Tabla (Uso de `AbstractTableModel`)
+- `SpeciesTableModel`: Columnas: Especie, Dieta, Estado, Población.
+- `RegionsTableModel`: Columnas: Fila, Columna, Tipo, Alimento, Animales.
+*Nota: Las tablas se actualizan solas al llamar a `fireTableDataChanged()` en `onAdvance`.*
 
 ---
 
-## 🏭 Factorías y Builders {#factorias}
+## 🏭 5. Factorías y Builders {#factorias}
 
-El proyecto usa el patrón **Factory Method** combinado con **Builder** para crear objetos a partir de descripciones JSON.
+El proyecto usa el patrón **Builder** para parsear el JSON de forma extensible.
 
 ```mermaid
 flowchart LR
@@ -119,11 +118,9 @@ flowchart LR
     BS --> A[Instancia de Sheep]
 ```
 
-Cualquier animal o región nueva debe tener su propio `Builder` registrado en `Main.java`.
-
 ---
 
-## 🔄 Flujos de Datos Principales {#flujos}
+## 🔄 6. Flujos de Datos Principales {#flujos}
 
 ### 1. Paso de Simulación (`advance`)
 
@@ -137,11 +134,10 @@ sequenceDiagram
 
     CP->>C: advance(dt)
     C->>S: advance(dt)
-    S->>S: time += dt
-    S->>RM: updateAll(dt)
-    RM->>RM: Aplicar leyes biológicas
+    S->>S: itera animales -> update()
+    S->>RM: updateAnimalRegion()
     S->>V: onAdvance(time, map, animals, dt)
-    V->>V: repaint() / updateTable()
+    V->>V: fireTableDataChanged() / repaint()
 ```
 
 ### 2. Carga de Configuración
@@ -154,50 +150,66 @@ sequenceDiagram
     participant F as Factories
 
     CP->>C: loadData(json)
-    C->>S: reset(dimensiones)
-    S-->>CP: onReset (limpia vista)
-    C->>C: Itera regiones en JSON
+    C->>S: reset()
     C->>S: setRegion(r, c, spec)
-    C->>C: Itera animales en JSON
     C->>S: addAnimal(spec)
     S->>F: createInstance(spec)
 ```
 
 ---
 
-## ⚙️ Puesta en Marcha {#puesta-en-marcha}
+## 🛠️ 7. Guía de Modificaciones para el Examen {#modificaciones}
 
-### Ejecución en modo GUI
-La clase de entrada es [`Main.java`](file:///c:/Users/pable/OneDrive/Desktop/25-26/Segundo%20cuatri/TP2/Practicas/TP2-P1/src/simulator/launcher/Main.java).
+### A. Añadir una nueva Especie (ej: `Bird`)
+1. Crear `Bird extends Animal`.
+2. Implementar lógica de vuelo en `update`.
+3. Crear `BirdBuilder extends Builder<Animal>`.
+4. Registrar en `Main.java`: `animalsFactory.addBuilder(new BirdBuilder(...))`.
 
-**Argumentos por defecto:**
-- `-m gui`: Inicia la interfaz gráfica.
-- `-i <fichero>`: Opcional, carga un JSON al arrancar.
+### B. Añadir una nueva Región (ej: `Water`)
+1. Crear `WaterRegion extends Region`.
+2. En `getFood`, devolver valores diferentes según el tipo de animal.
+3. Crear `WaterRegionBuilder`.
+4. Registrar en `Main.java`.
 
-**Controles del Mapa:**
-- `h`: Mostrar/Ocultar ayuda.
-- `s`: Filtrar animales por estado (NORMAL, HUNGER, etc.).
+### C. Modificar Comportamiento
+Si se pide que los lobos mueran al comer ovejas infectadas:
+- Modificar `Wolf.doHunger` para detectar el estado de la presa antes de cambiar `energy`.
 
 ---
 
-## 📁 Estructura de Paquetes
+## 📝 8. Ejercicios de Práctica (Para LLM) {#ejercicios}
+
+Si pasas esta guía a otra IA, pídele que resuelva:
+1. **Challenge 1**: "Haz que las ovejas recuperen energía extra si están en una región de tipo `DynamicSupplyRegion`."
+2. **Challenge 2**: "Crea una `SelectionStrategy` llamada `SelectWeakest` que elija al animal con menos energía."
+3. **Challenge 3**: "Implementa un botón 'Nuclear' que mate al 50% de los animales aleatoriamente."
+
+---
+
+## ⚙️ 8. Puesta en Marcha {#puesta-en-marcha}
+
+### Ejecución en modo GUI
+Clase de entrada: [`Main.java`](file:///c:/Users/pable/OneDrive/Desktop/25-26/Segundo%20cuatri/TP2/Practicas/TP2-P1/src/simulator/launcher/Main.java).
+**Argumentos:** `-m gui [-i input_file]`.
+
+**Controles del Mapa:**
+- `h`: Mostrar ayuda.
+- `s`: Cambiar esquema de colores/filtros.
+
+---
+
+## 📁 9. Estructura de Paquetes {#paquetes}
 
 ```
 src/simulator/
-├── launcher/
-│   └── Main.java             ← Punto de entrada
-├── control/
-│   └── Controller.java       ← Lógica de control
-├── model/
-│   ├── Simulator.java        ← Motor central
-│   ├── Animal.java           ← Base de animales
-│   ├── Region.java           ← Base de regiones
-│   └── EcoSysObserver.java   ← Interfaz del observador
-├── factories/
-│   ├── Builder.java          ← Interfaz de constructor
-│   └── WolfBuilder.java      ← Ejemplo de builder
-└── view/
-    ├── MainWindow.java       ← Ventana principal
-    ├── ControlPanel.java     ← Barra de botones
-    └── MapViewer.java        ← Dibujo del mapa
+├── launcher/      ← Main.java
+├── control/       ← Controller.java
+├── model/         ← Simulator, Animal, Region, RegionManager, EcoSysObserver
+├── factories/     ← Factory, Builder, WolfBuilder, etc.
+├── view/          ← MainWindow, ControlPanel, MapViewer, TableModels
+└── misc/          ← Utils, Vector2D
 ```
+
+---
+*Guía extendida para preparación de exámenes y soporte de desarrollo.*
