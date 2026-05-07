@@ -3,6 +3,7 @@ package simulator.view;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import simulator.control.Controller;
@@ -81,26 +82,26 @@ class RegionsTableModel extends AbstractTableModel implements EcoSysObserver {
 
 	@Override
 	public void onRegister(double time, MapInfo map, List<AnimalInfo> animals) {
-		update(map);
+		SwingUtilities.invokeLater(() -> update(map));
 	}
 
 	@Override
 	public void onReset(double time, MapInfo map, List<AnimalInfo> animals) {
-		update(map);
+		SwingUtilities.invokeLater(() -> update(map));
 	}
 
 	@Override
 	public void onAnimalAdded(double time, MapInfo map, List<AnimalInfo> animals, AnimalInfo a) {
-		update(map);
+		SwingUtilities.invokeLater(() -> update(map));
 	}
 
 	@Override
 	public void onRegionSet(int row, int col, MapInfo map, RegionInfo r) {
-		update(map);
+		SwingUtilities.invokeLater(() -> update(map));
 	}
 
 	@Override
 	public void onAdvance(double time, MapInfo map, List<AnimalInfo> animals, double dt) {
-		update(map);
+		SwingUtilities.invokeLater(() -> update(map));
 	}
 }

@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import org.json.JSONArray;
@@ -225,12 +226,12 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 
 	@Override
 	public void onRegister(double time, MapInfo map, List<AnimalInfo> animals) {
-		updateCoordinateModels(map);
+		SwingUtilities.invokeLater(() -> updateCoordinateModels(map));
 	}
 
 	@Override
 	public void onReset(double time, MapInfo map, List<AnimalInfo> animals) {
-		updateCoordinateModels(map);
+		SwingUtilities.invokeLater(() -> updateCoordinateModels(map));
 	}
 
 	@Override

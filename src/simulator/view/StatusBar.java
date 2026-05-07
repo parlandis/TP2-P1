@@ -8,6 +8,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.SwingUtilities;
 import simulator.control.Controller;
 import simulator.model.AnimalInfo;
 import simulator.model.EcoSysObserver;
@@ -64,21 +65,27 @@ class StatusBar extends JPanel implements EcoSysObserver {
 
 	@Override
 	public void onRegister(double time, MapInfo map, List<AnimalInfo> animals) { //Actualiza el observador con la informacion inicial del mapa y los animales
-		timeLabel.setText("Time:" + String.format("%.3f", time));
-		animalsLabel.setText("Total Animals:" + animals.size());
-		dimensionLabel.setText("Dimensions:" + map.getWidth() + "x" + map.getHeight() + " (" + map.getCols() + "x" + map.getRows() + ")");
+		SwingUtilities.invokeLater(() -> {
+			timeLabel.setText("Time:" + String.format("%.3f", time));
+			animalsLabel.setText("Total Animals:" + animals.size());
+			dimensionLabel.setText("Dimensions:" + map.getWidth() + "x" + map.getHeight() + " (" + map.getCols() + "x" + map.getRows() + ")");
+		});
 	}
 
 	@Override
 	public void onReset(double time, MapInfo map, List<AnimalInfo> animals) { // Actualiza el observador con la informacion del mapa y los animales después de un reset
-		timeLabel.setText("Time:" + String.format("%.3f", time));
-		animalsLabel.setText("Total Animals: " + animals.size());
-		dimensionLabel.setText("Dimensions: " + map.getWidth() + "x" + map.getHeight() + " (" + map.getCols() + "x" + map.getRows() + ")");
+		SwingUtilities.invokeLater(() -> {
+			timeLabel.setText("Time:" + String.format("%.3f", time));
+			animalsLabel.setText("Total Animals: " + animals.size());
+			dimensionLabel.setText("Dimensions: " + map.getWidth() + "x" + map.getHeight() + " (" + map.getCols() + "x" + map.getRows() + ")");
+		});
 	}
 
 	@Override
 	public void onAnimalAdded(double time, MapInfo map, List<AnimalInfo> animals, AnimalInfo a) { // Actualiza al añadio animal
-		animalsLabel.setText("Total Animals:" + animals.size());
+		SwingUtilities.invokeLater(() -> {
+			animalsLabel.setText("Total Animals:" + animals.size());
+		});
 	}
 
 	@Override
@@ -87,8 +94,10 @@ class StatusBar extends JPanel implements EcoSysObserver {
 
 	@Override
 	public void onAdvance(double time, MapInfo map, List<AnimalInfo> animals, double dt) {
-		timeLabel.setText("Time:" + String.format("%.3f", time));
-		animalsLabel.setText("Total Animals:" + animals.size());
+		SwingUtilities.invokeLater(() -> {
+			timeLabel.setText("Time:" + String.format("%.3f", time));
+			animalsLabel.setText("Total Animals:" + animals.size());
+		});
 	}
 
 }

@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.concurrent.*;
 
 import javax.swing.*;
 
@@ -36,7 +37,9 @@ class ControlPanel extends JPanel {
 	private JButton stopButton; // Boton de stop
 
 	//private boolean stopped = true; // utilizado en los botones de run/stop
-	private volatile Thread hilo; // El hilo que usaremos 
+	private volatile Thread hilo; // El hilo que usamos para el daely
+	private SwingWorker<Void, Void> worker;  //Este es el worker que vamos a usar, tenemos T = void , porque no devuelve nada y V= void porque no enviamos datos parciales 
+	
 
 	ControlPanel(Controller ctrl) {
 		this.ctrl = ctrl;
@@ -92,10 +95,17 @@ class ControlPanel extends JPanel {
 		this.stopButton.setToolTipText("Stop");
 		this.stopButton.setIcon(new ImageIcon("resources/icons/stop.png"));
 		this.stopButton.addActionListener((e) -> {
-			if(this.hilo != null) {
-				this.hilo.interrupt();
+			if (worker != null) {
+				worker.cancel(true);
 			}
 		});
+
+		/* Esto es del hilo 
+		this.stopButton.addActionListener((e) -> {
+			if (this.hilo != null) {
+				this.hilo.interrupt();
+			}
+		});*/
 		this.toolaBar.add(stopButton);
 
 		this.toolaBar.addSeparator();
@@ -164,15 +174,51 @@ class ControlPanel extends JPanel {
 			int n = (Integer) this.steps.getValue();
 			double delta = Double.parseDouble(this.dt.getText());
 			int delay = (Integer) this.nuevo.getValue();
-			this.hilo = new Thread(() -> {
-				runSim(n, delta, delay);
-	            SwingUtilities.invokeLater(() -> setButtonsEnabled(true));
-	            this.hilo = null;
-			});
 			
-			this.hilo.start(); 
-			
+			worker = new SwingWorker<Void, Void>() {
+				@Override
+				protected Void doInBackground() throws Exception {
+					int steps = n;
+					while (steps > 0 && !isCancelled()) {
+						ctrl.advance(delta);
+						if (delay > 0) {
+							Thread.sleep(delay);
+						}
+						steps--;
+					}
+					return null;
+				}
 
+				@Override
+				protected void done() {
+					try {
+						get();
+					} catch (ExecutionException e) {
+						ViewUtils.showErrorMsg(e.getCause().getMessage());
+					} catch (CancellationException | InterruptedException e) {
+						// Simulación parada por el usuario, no mostramos error
+					} finally {
+						worker = null;
+						setButtonsEnabled(true);
+					}
+				}
+			};
+			worker.execute();
+
+			/*
+			this.hilo = new Thread(() -> {
+				try {
+					runSim(n, delta, delay);
+				} catch (Exception e) {
+					SwingUtilities.invokeLater(() -> ViewUtils.showErrorMsg(e.getMessage()));
+				} finally {
+					SwingUtilities.invokeLater(() -> setButtonsEnabled(true));
+					this.hilo = null;
+				}
+			});
+			this.hilo.start();
+			*/
+			
 		} catch (Exception e) {
 			ViewUtils.showErrorMsg(e.getMessage());
 			setButtonsEnabled(true);
@@ -190,41 +236,24 @@ class ControlPanel extends JPanel {
 		// activado (o el usuario puede elegir salir cuando sea)
 	}
 	
+	
+
+	
 	private void runSim(int n, double dt, int delay) {
-		while (n > 0 && !Thread.currentThread().isInterrupted()){
+		while (n > 0 && !Thread.currentThread().isInterrupted()) {
 			try {
 				ctrl.advance(dt);
-			} catch(Exception e) {
-				// TODO: handle exception
-			}
-			
-			try {
-				Thread.sleep(delay);
+				if (delay > 0) {
+					Thread.sleep(delay);
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt(); // Volvemos a interrumpir para salir del bucle
+				return;
 			} catch (Exception e) {
-				// TODO: handle exception
-		        Thread.currentThread().interrupt();
-		        return;
+				SwingUtilities.invokeLater(() -> ViewUtils.showErrorMsg(e.getMessage()));
+				return;
 			}
-			
 			n--;
 		}
 	}
-
-	/*
-	private void runSim(int n, double dt) {
-		if (n > 0 && !this.stopped) {
-			try {
-				this.ctrl.advance(dt);
-				SwingUtilities.invokeLater(() -> runSim(n - 1, dt)); // Llamamos a runSim de nuevo con n-1 pasos, pero lo hacemos en el hilo de la interfaz gráfica para evitar bloquearla
-			} catch (Exception e) {
-				ViewUtils.showErrorMsg(e.getMessage());
-				this.stopped = true;
-				setButtonsEnabled(true);
-			}
-		} else {
-			this.stopped = true;
-			setButtonsEnabled(true);
-		}
-	}
-	*/
 }
