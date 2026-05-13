@@ -56,19 +56,23 @@ public abstract class Animal implements Entity, AnimalInfo {
 		// init(regionMngr);
 	}
 
+	// Constructor para la reproducción: crea un nuevo animal a partir de dos progenitores
 	protected Animal(Animal p1, Animal p2) {
 		this.dest = null;
 		this.baby = null;
 		this.mateTarget = null;
 		// this.regionMngr = null;
 		this.state = State.NORMAL;
+		// La energía inicial es el promedio de los progenitores
 		this.energy = (p1.getEnergy() + p2.getEnergy()) / 2;
 		this.age = 0.0;
 		this.desire = 0.0;
 		this.geneticCode = p1.getGeneticCode();
 		this.diet = p1.getDiet();
 		this.mateStrategy = p2.mateStrategy;
+		// Posición inicial cerca de p1 con un desplazamiento aleatorio (Gaussian para mayor naturalidad)
 		this.pos = p1.getPosition().plus(Vector2D.get_random_vector(-1, 1).scale(NEARBY_FACTOR * (Utils.RAND.nextGaussian() + 1)));
+		// Los atributos (vista, velocidad) heredan el promedio con una posible mutación aleatoria
 		this.sightRange = Utils.getRandomizedParameter((p1.getSightRange() + p2.getSightRange()) / 2,MUTATION_TOLERANCE);
 		this.speed = Utils.getRandomizedParameter((p1.getSpeed() + p2.getSpeed()) / 2, MUTATION_TOLERANCE);
 	}
@@ -86,6 +90,7 @@ public abstract class Animal implements Entity, AnimalInfo {
 		this.dest = new Vector2D(Utils.RAND.nextDouble(0, regMngr.getWidth()), Utils.RAND.nextDouble(0, regMngr.getHeight()));
 	}
 
+	// Ajusta la posición para que el mapa sea toroidal (si sales por la derecha apareces por la izquierda)
 	private Vector2D adjustPos(Vector2D p, int w, int h) {
 		double x = p.getX();
 		double y = p.getY();
@@ -100,21 +105,29 @@ public abstract class Animal implements Entity, AnimalInfo {
 		return new Vector2D(x, y);
 	}
 
+	protected void adjustPositionToMap() {
+		this.pos = adjustPos(this.pos, this.regionMngr.getWidth(), this.regionMngr.getHeight());
+	}
+
 	@Override
 	public void update(double dt) {
 
 	}
 	//Nace el bebe
+	// Entrega la cría y resetea el atributo baby para que el animal pueda volver a quedar preñado
 	protected Animal deliverBaby() {
 		Animal bebe = this.baby;
 		this.baby = null;
 		return bebe;
 	}
 
+	// Calcula el movimiento hacia el destino 'dest' usando aritmética de vectores
 	protected void move(double speed) {
+		// (dest - pos) da el vector dirección, .direction() lo normaliza (longitud 1) y scale escala por la velocidad
 		this.pos = pos.plus(dest.minus(pos).direction().scale(speed));
 	}
 
+	// Cambia el estado del animal y ejecuta la acción de configuración correspondiente (Template Method)
 	protected void setState(State state) { 
 		this.state = state;
 		switch (state) {

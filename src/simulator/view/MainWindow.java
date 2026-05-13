@@ -15,17 +15,17 @@ public class MainWindow extends JFrame {
 	}
 
 	private void initGUI() {
-		//Panel principal 
+		// 1) Panel principal: Usa BorderLayout para organizar las piezas grandes
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		setContentPane(mainPanel);
 
-		//Barra de estado y control
+		// Barra de control arriba (PAGE_START) y barra de estado abajo (PAGE_END)
 		ControlPanel cp = new ControlPanel(ctrl);
 		mainPanel.add(cp, BorderLayout.PAGE_START);
 		StatusBar sb = new StatusBar(ctrl);
 		mainPanel.add(sb, BorderLayout.PAGE_END);
 
-		// Definición del panel de tablas
+		// 2) Panel Central: Usa BoxLayout (Y_AXIS) para apilar las tablas verticalmente
 		JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 		mainPanel.add(contentPanel, BorderLayout.CENTER);
@@ -40,8 +40,8 @@ public class MainWindow extends JFrame {
 		regionsTable.setPreferredSize(new Dimension(500, 250));
 		contentPanel.add(regionsTable);
 
-		// Window listener
-		addWindowListener(new java.awt.event.WindowAdapter() { // para controlar el cierre de la ventana
+		// 3) Gestión del cierre: Evitamos el cierre automático para mostrar un diálogo de confirmación
+		addWindowListener(new java.awt.event.WindowAdapter() { 
 			@Override
 			public void windowClosing(java.awt.event.WindowEvent e) {
 				ViewUtils.quit(MainWindow.this);
@@ -49,7 +49,7 @@ public class MainWindow extends JFrame {
 		});
 
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		pack();
+		pack(); // Ajusta el tamaño de la ventana a sus componentes
 		setVisible(true);
 	}
 

@@ -220,19 +220,22 @@ public class Main {
 		}
 	}
 
+	// Inicialización de las factorías: se crean y se registran todos los Builders disponibles
 	private static void initFactories() {
-		// Inicializamos las factorias con los builder para cada tipo
+		// 1) Factoría de Estrategias de Selección
 		List<Builder<SelectionStrategy>> selectionStrategyBuilders = new ArrayList<>();
 		selectionStrategyBuilders.add(new SelectFirstBuilder());
 		selectionStrategyBuilders.add(new SelectClosestBuilder());
 		selectionStrategyBuilders.add(new SelectYoungestBuilder());
 		_strategyFactory = new BuilderBasedFactory<SelectionStrategy>(selectionStrategyBuilders);
 
+		// 2) Factoría de Animales: inyectamos la factoría de estrategias en los builders de animales
 		List<Builder<Animal>> animalsBuilders = new ArrayList<>();
 		animalsBuilders.add(new SheepBuilder(_strategyFactory));
 		animalsBuilders.add(new WolfBuilder(_strategyFactory));
 		_animalFactory = new BuilderBasedFactory<Animal>(animalsBuilders);
 
+		// 3) Factoría de Regiones
 		List<Builder<Region>> regionsBuilder = new ArrayList<>();
 		regionsBuilder.add(new DefaultRegionBuilder());
 		regionsBuilder.add(new DynamicSupplyRegionBuilder());
@@ -245,8 +248,9 @@ public class Main {
 		return new JSONObject(new JSONTokener(in));
 	}
 
+	// Inicia la simulación en modo consola (sin ventana)
 	private static void startBatchMode() throws Exception {
-		// Cargamos el JSON de configuración
+		// 1) Cargamos el fichero de configuración JSON
 		InputStream is = new FileInputStream(new File(inFile));
 		JSONObject json = loadJSONFile(is);
 		is.close();
@@ -256,16 +260,17 @@ public class Main {
 		int rows = json.optInt("rows", 20);
 		int cols = json.optInt("cols", 15);
 
-		// Instanciamos el simulador, el controlador y ejecutamos la simulación
+		// 2) Instanciamos el modelo (Simulador) y el controlador
 		Simulator sim = new Simulator(cols, rows, width, height, _animalFactory, _regionFactory);
 		Controller ctrl = new Controller(sim);
 
-		// Cargamos los datos del Json al controlador
+		// 3) Cargamos los datos (animales y regiones)
 		ctrl.loadData(json);
 
-		// Configuramos donde se va a escribir la salida de la simulación
+		// 4) Configuramos la salida (consola o fichero)
 		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
 
+		// 5) Ejecutamos el bucle de simulación en el controlador
 		ctrl.run(time, deltaTime, simpleViewer, out);
 
 		if (out != System.out) {
@@ -273,10 +278,12 @@ public class Main {
 		}
 	}
 
+	// Inicia la simulación con interfaz gráfica
 	private static void startGUIMode() throws Exception {
 		Simulator sim;
 		Controller ctrl;
 		
+		// Si se proporciona un fichero de entrada, lo cargamos para inicializar el simulador
 		if (inFile != null) {
 			InputStream is = new FileInputStream(new File(inFile));
 			JSONObject json = loadJSONFile(is);
@@ -291,21 +298,28 @@ public class Main {
 			ctrl = new Controller(sim);
 			ctrl.loadData(json);
 		} else {
+			// Si no hay fichero, iniciamos un simulador vacío por defecto
 			sim = new Simulator(20, 15, 800, 600, _animalFactory, _regionFactory);
 			ctrl = new Controller(sim);
 		}
 		
+		// Lanzamos la ventana principal en el hilo de Swing (EDT)
 		javax.swing.SwingUtilities.invokeAndWait(() -> new simulator.view.MainWindow(ctrl));
 	}
 
+	// Punto de entrada real de la aplicación
 	private static void start(String[] args) throws Exception {
+		// 1) Inicializar factorías (Define qué animales y regiones existen)
 		initFactories();
+		// 2) Parsear los argumentos de la línea de comandos
 		parseArgs(args);
+		// 3) Configurar la semilla aleatoria para que los experimentos sean reproducibles
 		if (seed != null) {
 			Utils.RAND.setSeed(seed);
 		} else {
 			Utils.RAND.setSeed(2147483647l);
 		}
+		// 4) Lanzar el modo correspondiente (Batch o GUI)
 		switch (mode) {
 			case BATCH:
 				startBatchMode();

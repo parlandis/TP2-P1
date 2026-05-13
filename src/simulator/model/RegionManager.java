@@ -44,11 +44,14 @@ public class RegionManager implements AnimalMapView {
 		}
 	}
 
-	protected void registerAnimal(Animal a) { // Añade el animal a la region correspondiente a su posicion
+	// Registra un animal en el gestor: inicializa su posición y lo asigna a la región correspondiente
+	protected void registerAnimal(Animal a) { 
 		a.init(this);
+		// Cálculo de columna (c) y fila (r) basado en las coordenadas (x, y) y el tamaño de región
 		int c = (int) (a.getPosition().getX() / this.regWidth);
 		int r = (int) (a.getPosition().getY() / this.regHeight);
 
+		// Asegurar que los índices están dentro de los límites de la matriz de regiones
 		if (c >= cols)
 			c = cols - 1;
 		if (r >= rows)
@@ -89,10 +92,12 @@ public class RegionManager implements AnimalMapView {
 
 	}
 
+	// Se encarga de mover al animal de una región a otra si sus coordenadas han cambiado de cuadrante
 	protected void updateAnimalRegion(Animal a) {
 		Region actual = animalRegion.get(a);
 		Region region = regionByPosition(a);
-		if (actual != region) { // Comprobamos que el animal se ha o no movido de region
+		// Solo se realiza el cambio si la nueva posición corresponde a una región distinta
+		if (actual != region) { 
 			region.addAnimal(a);
 			actual.removeAnimal(a);
 			animalRegion.put(a, region);
@@ -113,30 +118,32 @@ public class RegionManager implements AnimalMapView {
 		}
 	}
 
-	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter) { // la hacemos para que sea dentro del
-																				// mapa y en rangop
+	// OPTIMIZACIÓN: Busca animales dentro del rango de visión de 'a' de forma eficiente
+	public List<Animal> getAnimalsInRange(Animal a, Predicate<Animal> filter) { 
 		List<Animal> inRange = new ArrayList<>();
 
 		double x = a.getPosition().getX();
 		double y = a.getPosition().getY();
 		double r = a.getSightRange();
 
+		// En lugar de mirar todo el mapa, calculamos qué regiones (cuadrículas) se solapan con el círculo de visión
 		int cFrom = (int) ((x - r) / regWidth);
 		int cTo = (int) ((x + r) / regWidth);
 		int rFrom = (int) ((y - r) / regHeight);
 		int rTo = (int) ((y + r) / regHeight);
 
-		// Ajustar límites
+		// Ajustar límites para no salir de la matriz regions[][]
 		cFrom = Math.max(0, cFrom);
 		cTo = Math.min(cols - 1, cTo);
 		rFrom = Math.max(0, rFrom);
 		rTo = Math.min(rows - 1, rTo);
 
-		for (int i = rFrom; i <= rTo; i++) { // Recorremos las regiones dentro del rango calculado
-			for (int j = cFrom; j <= cTo; j++) { // Recorremos los animales de cada region y comprobamos si estan dentro
-													// del rango de vision y cumplen el filtro
+		// Solo iteramos por las regiones potencialmente visibles
+		for (int i = rFrom; i <= rTo; i++) { 
+			for (int j = cFrom; j <= cTo; j++) { 
 				List<Animal> animals = regions[i][j].getAnimals();
 				for (Animal animal : animals) {
+					// Verificamos: que no sea él mismo, la distancia real (Euclídea) y el filtro (ej: ser herbívoro)
 					if (!animal.equals(a) && animal.getPosition().distanceTo(a.getPosition()) <= r
 							&& filter.test(animal)) {
 						inRange.add(animal);

@@ -109,40 +109,46 @@ public class Simulator implements JSONable, Observable<EcoSysObserver> {
 		notifyOnReset();
 	}
 
+	// CICLO PRINCIPAL: Avanza la simulación dt segundos
 	public void advance(double dt) {
-		// 1. Incrementar el tiempo
+		// 1. Incrementar el tiempo global de la simulación
 		this.time += dt;
 
-		// 2. Quitar animales muertos de forma segura
+		// 2. Limpieza: Quitar animales muertos
+		// Usamos un Iterator para poder borrar elementos de la lista 'listaA' mientras la recorremos
+		// sin que lance una ConcurrentModificationException.
 		Iterator<Animal> it = listaA.iterator();
 		while (it.hasNext()) {
 			Animal a = it.next();
 			if (a.getState() == State.DEAD) {
-				reMng.unregisterAnimal(a);
-				it.remove();
+				reMng.unregisterAnimal(a); // Se quita de la estructura de regiones
+				it.remove();               // Se quita de la lista global del simulador
 			}
 		}
 
-		// 3. Actualizar animales vivos
+		// 3. Actualizar animales vivos: movimiento, cambio de estado y actualización de su región
 		for (Animal a : listaA) {
 			a.update(dt);
-			reMng.updateAnimalRegion(a);
+			reMng.updateAnimalRegion(a); // Importante: el animal puede haber cambiado de cuadrícula
 		}
 
-		// 4. Actualizar regiones
+		// 4. Actualizar regiones: regeneración de comida, etc.
 		reMng.updateAllRegions(dt);
 
-		// 5. Nacimientos (usando lista temporal para evitar CME)
+		// 5. Nacimientos:
+		// Creamos una lista temporal 'babies' para no modificar 'listaA' mientras la iteramos (evitar CME)
 		List<Animal> babies = new ArrayList<>();
 		for (Animal a : listaA) {
 			if (a.isPregnant()) {
-				babies.add(a.deliverBaby());
+				babies.add(a.deliverBaby()); // deliverBaby() devuelve la cría y limpia la referencia en la madre
 			}
 		}
+		// Finalmente añadimos los recién nacidos al sistema
 		for (Animal b : babies) {
 			addAnimal(b);
 		}
 
+		// 6. Notificar a los observadores (vistas) que el estado ha cambiado
 		notifyOnAdvance(dt);
 	}
 

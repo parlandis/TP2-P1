@@ -21,6 +21,7 @@ public class SheepBuilder extends Builder<Animal> {
 	@Override
 	protected Sheep createInstance(JSONObject data) {
 		Vector2D pos = null;
+		// 1) Procesamiento de la posición: si el JSON trae "pos", calculamos una posición aleatoria en el rango
 		if (data.has("pos")) {
 			JSONObject p = data.getJSONObject("pos");
 
@@ -35,9 +36,12 @@ public class SheepBuilder extends Builder<Animal> {
 		SelectionStrategy mateStrategy = null;
 		SelectionStrategy dangerStrategy = null;
 
+		// 2) Procesamiento de estrategias: usamos OTRA FACTORÍA (strategyFactory) para delegar
+		// la creación de las estrategias (SelectFirst, SelectClosest, etc.)
 		if (data.has("mate_strategy")) {
 			mateStrategy = strategyFactory.createInstance(data.getJSONObject("mate_strategy"));
 		} else {
+			// Valor por defecto si no se especifica en el JSON
 			mateStrategy = new SelectFirst();
 		}
 
@@ -47,6 +51,7 @@ public class SheepBuilder extends Builder<Animal> {
 			dangerStrategy = new SelectFirst();
 		}
 
+		// 3) Finalmente creamos el objeto Sheep con todos sus componentes
 		return new Sheep(mateStrategy, dangerStrategy, pos);
 	}
 

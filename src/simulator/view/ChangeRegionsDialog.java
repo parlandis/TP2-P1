@@ -62,9 +62,11 @@ class ChangeRegionsDialog extends JDialog implements EcoSysObserver {
 
 		// 1. Ayuda
 		JPanel helpPanel = new JPanel();
+		helpPanel.setLayout(new BoxLayout(helpPanel, BoxLayout.X_AXIS));
+		helpPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		helpPanel.setAlignmentX(CENTER_ALIGNMENT);
 		JLabel helpLabel = new JLabel(
-				"<html>Select a region type, the rows/cols interval, and provide values for the parametes in the <b>Value column</b> (default values are used for parametes with no value).</html>");
+				"<html>Select a region type, the rows/columns interval, and provide values for the parameters in the <b>Value column</b> (default values are used for parameters with no value).</html>");
 		helpPanel.add(helpLabel);
 		mainPanel.add(helpPanel);
 

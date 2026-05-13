@@ -33,6 +33,8 @@ public class Sheep extends Animal {
 
 	@Override
 	public void update(double dt) {
+		// 1) Ejecutar la acción propia del estado actual (Normal, Peligro, Pareja,
+		// etc.)
 		switch (state) {
 			// 1
 			case DEAD:
@@ -53,22 +55,20 @@ public class Sheep extends Animal {
 			default:
 				return;
 		}
-		// 3 - Limitar posición dentro de los límites de la región
+		// 2) Ajustar posición si sale del mapa (comportamiento toroidal)
 		double maxX = this.regionMngr.getWidth();
 		double maxY = this.regionMngr.getHeight();
 
-		if (pos.getX() <= 0.0 || pos.getX() >= maxX || pos.getY() <= 0.0 || pos.getY() >= maxY) {
-			double validX = Utils.constrainValueInRange(pos.getX(), 0, maxX - 1);
-			double validY = Utils.constrainValueInRange(pos.getY(), 0, maxY - 1);
-			this.pos = new Vector2D(validX, validY);
-
+		if (pos.getX() < 0.0 || pos.getX() >= maxX || pos.getY() < 0.0 || pos.getY() >= maxY) {
+			this.adjustPositionToMap();
 			this.setState(State.NORMAL);
 		}
-		// 4 - Comprobar si muere por edad o energía
+		// 3) Comprobar condiciones de muerte (energía agotada o vejez)
 		if (this.energy <= 0.0 || this.age >= MAX_AGE_SHEEP) {
 			this.setState(State.DEAD);
 		}
-		// 5 - Comida de la región
+		// 4) Alimentación automática: las ovejas comen de la región en la que se
+		// encuentran
 		if (this.state != State.DEAD) {
 			double food = this.regionMngr.getFood(this, dt);
 			this.energy += food;
@@ -124,10 +124,12 @@ public class Sheep extends Animal {
 		if (dangerSource == null) {
 			move(speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR));
 		}
-		// 2)
+		// 2) Si hay peligro, huir
 		else {
+			// El destino es la dirección opuesta al origen del peligro: (pos - dangerPos)
 			Vector2D destination = pos.plus(pos.minus(dangerSource.getPosition()).direction());
 			this.dest = destination;
+			// Se mueve a mayor velocidad (BOOST_FACTOR) y consume más energía
 			move(BOOST_FACTOR_SHEEP * speed * dt * Math.exp((energy - 100.0) * HUNGER_DECAY_EXP_FACTOR));
 			this.age += dt;
 			this.energy -= FOOD_DROP_RATE_SHEEP * FOOD_DROP_BOOST_FACTOR_SHEEP * dt;
@@ -179,7 +181,7 @@ public class Sheep extends Animal {
 			if (this.pos.distanceTo(mateTarget.getPosition()) < COLLISION_RANGE) {
 				this.desire = 0.0;
 				mateTarget.desire = 0.0;
-				// 2.6.b)
+				// 2.6.b) Probabilidad de embarazo si no está ya preñada
 				if (this.baby == null) {
 					if (Utils.RAND.nextDouble() < PREGNANT_PROBABILITY_SHEEP) {
 						this.baby = new Sheep(this, mateTarget);

@@ -161,30 +161,22 @@ public class MapViewer extends AbstractMapViewer {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
+		// Graphics2D permite un renderizado de mayor calidad (suavizado de bordes)
 		Graphics2D gr = (Graphics2D) g;
 		gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		gr.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-		// Cambiar el font para dibujar texto.
-		//
-		// Change the font to be used when drawing text.
-		//
 		g.setFont(textFont);
 
-		// Dibujar fondo blanco.
-		//
-		// Draw a white background.
-		//
+		// 1) Limpiar el fondo: pintamos todo el área de blanco antes de dibujar el nuevo estado
 		gr.setBackground(Color.WHITE);
 		gr.clearRect(0, 0, width, height);
 
-		// Dibujar los animales, el tiempo, informacion sobre los especie, etc.
-		//
-		// Draw the animals, the time, species information. etc.
-		//
+		// 2) Dibujar los objetos (animales, rejilla, etc.) delegando en drawObjects
 		if (objs != null)
 			drawObjects(gr, objs, time);
 
+		// 3) Dibujar la información de ayuda si está activa
 		if (showHelp) {
 			g.setColor(Color.RED);
 			g.drawString("h: toggle help", 5, 20);

@@ -14,9 +14,14 @@ public class DynamicSupplyRegion extends Region {
 	}
 
 	@Override
-	public double getFood(AnimalInfo a, double dt) { // Da alimento a los herbivoros
+	public double getFood(AnimalInfo a, double dt) { 
+		// Solo los herbívoros consumen comida de la región
 		if (a.getDiet().equals(Diet.CARNIVORE))
 			return 0.0;
+		
+		// Lógica de "Sobrepastoreo": la cantidad de comida disponible disminuye exponencialmente
+		// con el número de herbívoros (nH) presentes en la región.
+		// Si hay más de 5 herbívoros (nH > 5.0), la comida obtenida cae drásticamente.
 		double comido = Math.min(food, 60.0 * Math.exp(-Math.max(0, this.nH - 5.0) * 2.0) * dt);
 		food -= comido;
 		return comido;

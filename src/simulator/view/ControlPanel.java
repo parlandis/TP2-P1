@@ -95,7 +95,8 @@ class ControlPanel extends JPanel {
 
 		// Pasos (Steps)
 		this.toolaBar.add(new JLabel(" Steps: "));
-		this.steps = new JSpinner(new SpinnerNumberModel(10000, 1, 10000, 100)); // Marcamos valor ini, minimo, maximo y paso (incremento/decremento)
+		this.steps = new JSpinner(new SpinnerNumberModel(10000, 1, 10000, 100)); // Marcamos valor ini, minimo, maximo y
+																					// paso (incremento/decremento)
 		this.steps.setToolTipText("Simulation steps to run: 1 - 10000");
 		this.steps.setMinimumSize(new Dimension(80, 30));
 		this.steps.setPreferredSize(new Dimension(80, 30));
@@ -104,7 +105,9 @@ class ControlPanel extends JPanel {
 
 		// Delta-Time
 		this.toolaBar.add(new JLabel(" Delta-Time: "));
-		this.dt = new JTextField(Main.deltaTime != null ? Main.deltaTime.toString() : "0.03"); // Si Main.deltaTime es// null, se pone 0.03 																							// por defecto
+		this.dt = new JTextField(Main.deltaTime != null ? Main.deltaTime.toString() : "0.03"); // Si Main.deltaTime es//
+																								// null, se pone 0.03 //
+																								// por defecto
 		this.dt.setToolTipText("Real time (in seconds) corresponding to a step");
 		this.dt.setMinimumSize(new Dimension(80, 30));
 		this.dt.setPreferredSize(new Dimension(80, 30));
@@ -117,7 +120,8 @@ class ControlPanel extends JPanel {
 		this.quitButton = new JButton();
 		this.quitButton.setToolTipText("Quit");
 		this.quitButton.setIcon(new ImageIcon("resources/icons/exit.png"));
-		this.quitButton.addActionListener((e) -> ViewUtils.quit(this)); // Cierra la ventana actual (y por tanto la aplicación, al ser la ventana principal)
+		this.quitButton.addActionListener((e) -> ViewUtils.quit(this)); // Cierra la ventana actual (y por tanto la
+																		// aplicación, al ser la ventana principal)
 		this.toolaBar.add(quitButton);
 	}
 
@@ -143,7 +147,8 @@ class ControlPanel extends JPanel {
 
 	private void startSim() {
 		this.stopped = false;
-		setButtonsEnabled(false); // Desactivamos los botones mientras se ejecuta la simulación (excepto el de stop)
+		setButtonsEnabled(false); // Desactivamos los botones mientras se ejecuta la simulación (excepto el de
+									// stop)
 		try {
 			int n = (Integer) this.steps.getValue();
 			double delta = Double.parseDouble(this.dt.getText());
@@ -166,11 +171,17 @@ class ControlPanel extends JPanel {
 		// activado (o el usuario puede elegir salir cuando sea)
 	}
 
+	// Ejecución de la simulación: se encarga de llamar al controlador paso a paso
 	private void runSim(int n, double dt) {
 		if (n > 0 && !this.stopped) {
 			try {
+				// 1) Pedimos al controlador que avance un paso
 				this.ctrl.advance(dt);
-				SwingUtilities.invokeLater(() -> runSim(n - 1, dt)); // Llamamos a runSim de nuevo con n-1 pasos, pero lo hacemos en el hilo de la interfaz gráfica para evitar bloquearla
+
+				// 2) RECURSIÓN CON SWING: Usamos invokeLater para programar el siguiente paso.
+				// Esto es CRUCIAL para que el hilo de la interfaz gráfica (EDT) tenga tiempo
+				// de redibujar las tablas y el mapa entre paso y paso, evitando que se congele.
+				SwingUtilities.invokeLater(() -> runSim(n - 1, dt));
 			} catch (Exception e) {
 				ViewUtils.showErrorMsg(e.getMessage());
 				this.stopped = true;

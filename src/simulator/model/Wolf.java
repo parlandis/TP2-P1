@@ -52,8 +52,10 @@ public class Wolf extends Animal {
 				break;
 		}
 		// 3. Limitar posición dentro de los límites de la región
-		if (pos.getX() < 0.0 || pos.getX() >= regionMngr.getWidth() || pos.getY() < 0.0 || pos.getY() >= regionMngr.getHeight()) {
-			pos = new Vector2D(Utils.constrainValueInRange(pos.getX(), 0, regionMngr.getWidth() - 1),Utils.constrainValueInRange(pos.getY(), 0, regionMngr.getHeight() - 1));
+		double maxX = regionMngr.getWidth();
+		double maxY = regionMngr.getHeight();
+		if (pos.getX() < 0.0 || pos.getX() >= maxX || pos.getY() < 0.0 || pos.getY() >= maxY) {
+			this.adjustPositionToMap();
 			setState(State.NORMAL);
 		}
 		// 4. Muerte por edad o falta de energía
@@ -88,20 +90,22 @@ public class Wolf extends Animal {
 	}
 
 	private void doHunger(double dt) {
-		// 1. Buscar presa
+		// 1. Buscar presa: si no tiene objetivo, o está muerto, o se alejó demasiado, busca uno nuevo
 		if (huntTarget == null || huntTarget.getState() == State.DEAD|| huntTarget.getPosition().distanceTo(pos) > sightRange) {
 			huntTarget = huntingStrategy.select(this, this.regionMngr.getAnimalsInRange(this, a -> a.getDiet() == Diet.HERBIVORE));
 		}
-		// 2. Si no hay presa, moverse aleatoriamente
+		// 2. Si no hay presa, moverse aleatoriamente (como en estado NORMAL)
 		if (huntTarget == null) {
 			doNormal(dt);
 		} else {
+			// Persecución: el destino es la posición actual de la presa
 			this.dest = huntTarget.getPosition();
 			move(BOOST_FACTOR_WOLF * speed * dt * Math.exp((energy - 100.0) * 0.007));
 			this.age += dt;
 			this.energy = Math.max(0, this.energy - FOOD_DROP_RATE_WOLF * FOOD_DROP_BOOST_FACTOR_WOLF * dt);
 			this.desire = Math.min(100.0, this.desire + DESIRE_INCREASE_RATE_WOLF * dt);
 
+			// Ataque: si está lo suficientemente cerca, mata a la presa y recupera energía
 			if (pos.distanceTo(huntTarget.getPosition()) < 8.0) {
 				huntTarget.setState(State.DEAD);
 				huntTarget = null;
@@ -139,9 +143,11 @@ public class Wolf extends Animal {
 			if (pos.distanceTo(mateTarget.getPosition()) < 8.0) {
 				this.desire = 0.0;
 				mateTarget.desire = 0.0;
+				// Probabilidad de éxito en la reproducción
 				if (baby == null && Utils.RAND.nextDouble() < PREGNANT_PROBABILITY_WOLF) {
 					baby = new Wolf(this, mateTarget);
 				}
+				// La reproducción consume energía extra
 				this.energy = Math.max(0, this.energy - 10.0);
 				mateTarget = null;
 			}

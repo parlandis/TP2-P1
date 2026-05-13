@@ -26,6 +26,7 @@ class SpeciesTableModel extends AbstractTableModel implements EcoSysObserver {
 		ctrl.addObserver(this);
 	}
 
+	// Método interno que procesa la lista de animales para agruparlos por especie y estado
 	private void update(List<AnimalInfo> animals) {
 		species.clear();
 		data.clear();
@@ -35,18 +36,21 @@ class SpeciesTableModel extends AbstractTableModel implements EcoSysObserver {
 			if (!data.containsKey(g)) {
 				species.add(g);
 				Map<State, Integer> statesCount = new HashMap<>();
-				// Inicializar todos los estados posibles a 0 dinámicamente
+				// Inicializar todos los contadores de estado a 0
 				for (State s : State.values()) {
 					statesCount.put(s, 0);
 				}
 				data.put(g, statesCount);
 			}
+			// Incrementamos el contador correspondiente al estado del animal
 			Map<State, Integer> counts = data.get(g);
 			counts.put(a.getState(), counts.get(a.getState()) + 1);
 		}
 
-		Collections.sort(species); // Ordenar alfabéticamente las especies
-		fireTableDataChanged(); // Notificar a la tabla que los datos han cambiado para que se actualice la vista
+		Collections.sort(species); 
+		// NOTIFICACIÓN CRUCIAL: Informa al JTable de que los datos han cambiado
+		// para que el componente invoque a getValueAt() y se refresque visualmente
+		fireTableDataChanged(); 
 	}
 
 	@Override

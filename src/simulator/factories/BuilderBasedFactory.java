@@ -35,13 +35,20 @@ public class BuilderBasedFactory<T> implements Factory<T> {
 			throw new IllegalArgumentException("’info’ cannot be null");  
 		}
 		
-		//Buscamos el builder a partir del tag del tipo
+		// 1) Obtenemos el tipo del objeto que queremos crear (ej: "sheep", "wolf")
 		String type = info.getString("type");
+		// 2) Buscamos en nuestro mapa de builders cuál sabe manejar ese tipo
 		Builder<T> builder = this.builders.get(type);
 		
 		if(builder != null) {
-			//Si el builder existe, obtenemos los datos del JSON ,si los hay y creamos la instancia a partir del builder
+			// 3) Extraemos la sección "data" del JSON (los parámetros específicos)
+			// Si no existe, pasamos un JSON vacío
 			JSONObject data = info.has("data") ? info.getJSONObject("data") : new JSONObject();
+			
+			// PATRÓN FACTORY METHOD: El builder utiliza un método de fábrica para instanciar 
+			// el objeto específico. Aquí delegamos la lógica de creación al builder concreto.
+			
+			// 4) Delegamos la creación real al builder específico
 			T instance = builder.createInstance(data); 
 			
 			if(instance != null) {
@@ -50,6 +57,7 @@ public class BuilderBasedFactory<T> implements Factory<T> {
 			
 		}
 		
+		// Si no encontramos un builder que coincida con el "type", lanzamos error
 		throw new IllegalArgumentException("Unrecognized ‘info’:" + info.toString());  
 	}
 
