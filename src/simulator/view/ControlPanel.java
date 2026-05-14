@@ -18,6 +18,8 @@ class ControlPanel extends JPanel {
 
 	private Controller ctrl;
 	private ChangeRegionsDialog changeRegionsDialog;
+	private AgeLimitStatistics estadisticas;
+	private AgeTableModel ageTableModel;
 
 	private JToolBar toolaBar;
 
@@ -28,6 +30,7 @@ class ControlPanel extends JPanel {
 	private JSpinner steps; // Boton de flechas para subir o bajar el numero de pasos
 	private JTextField dt; // Para poder poner el valor de dt
 	private JFileChooser fc; // Es el explorador de archivos
+	private JButton limiteEdadButton; 
 
 	private JButton mapButton; // Boton del mapa
 	private JButton runButton; // Boton de run
@@ -51,6 +54,8 @@ class ControlPanel extends JPanel {
 
 		// inicializamos ChangeRegionsDialog
 		this.changeRegionsDialog = new ChangeRegionsDialog(this.ctrl);
+		this.ageTableModel = new AgeTableModel(this.ctrl);
+		this.estadisticas = new AgeLimitStatistics(ViewUtils.getWindow(this), this.ageTableModel);
 
 		// Botón Open
 		this.openButton = new JButton();
@@ -76,6 +81,15 @@ class ControlPanel extends JPanel {
 		this.toolaBar.add(regionsButton);
 
 		this.toolaBar.addSeparator();
+		
+		//Boton limiteEdad
+		this.limiteEdadButton = new JButton();
+		this.limiteEdadButton.setToolTipText("Limite de edad");
+		this.limiteEdadButton.setIcon(new ImageIcon("resources/icons/stats.png"));
+		this.limiteEdadButton.addActionListener(e -> this.estadisticas.open(ViewUtils.getWindow(this)));
+		this.toolaBar.add(limiteEdadButton);
+		this.toolaBar.addSeparator();
+		
 
 		// Botón Run
 		this.runButton = new JButton();

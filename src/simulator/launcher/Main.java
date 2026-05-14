@@ -69,6 +69,7 @@ public class Main {
 	public static Double deltaTime = null;
 	private static String inFile = null;
 	private static String outFile = null;
+	public static Double limite = null;
 	private static boolean simpleViewer = false;
 	private static ExecMode mode = ExecMode.GUI;
 	private static Long seed = null;
@@ -88,6 +89,7 @@ public class Main {
 		try {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
+			parseLimiteOption(line);
 			parseModeOption(line);
 			parseInFileOption(line);
 			parseOutFileOption(line);
@@ -116,6 +118,8 @@ public class Main {
 
 	private static Options buildOptions() {
 		Options cmdLineOptions = new Options();
+		
+	
 
 		// help
 		cmdLineOptions.addOption(Option.builder("h").longOpt("help").desc("Print this message.").build());
@@ -135,6 +139,14 @@ public class Main {
 						+ DEFAULT_DELTA_TIME + ".")
 				.build());
 
+		
+		//Nuevo
+		cmdLineOptions.addOption(Option.builder("ps")
+				.longOpt("Population")
+				.hasArg()
+				.desc("Pone un limite para el numero de animales")
+				.build());
+		
 		// output file
 		cmdLineOptions.addOption(
 				Option.builder("o").longOpt("output").hasArg().desc("Output file, where output is written.").build());
@@ -181,15 +193,29 @@ public class Main {
 			throw new ParseException("Invalid value for time: " + t);
 		}
 	}
+	
+	private static void parseLimiteOption(CommandLine line) throws ParseException{
+		if(line.hasOption("ps")) {
+			String l = line.getOptionValue("ps", "100.0");
+			try {
+				limite = Double.parseDouble(l);
+				assert(limite > 0);
+			}catch (Exception e) {
+				throw new ParseException("Invalid r de limite:" + l);
+			}
+		}
+	}
 
 	private static void parseDeltaTimeOption(CommandLine line) throws ParseException {
-		String dt = line.getOptionValue("dt", DEFAULT_DELTA_TIME.toString());
-		try {
-			deltaTime = Double.parseDouble(dt);
-			assert (deltaTime > 0);
-		} catch (Exception e) {
-			throw new ParseException("Invalid value for delta-time: " + dt);
-		}
+	
+			String dt = line.getOptionValue("dt", DEFAULT_DELTA_TIME.toString());
+			try {
+				deltaTime = Double.parseDouble(dt);
+				assert (deltaTime > 0);
+			} catch (Exception e) {
+				throw new ParseException("Invalid value for delta-time: " + dt);
+			}
+		
 	}
 
 	private static void parseOutFileOption(CommandLine line) {
@@ -266,17 +292,29 @@ public class Main {
 		Simulator sim = new Simulator(cols, rows, width, height, _animalFactory, _regionFactory);
 		Controller ctrl = new Controller(sim);
 
+		// Pregunta 2: Registrar PopulationObserver si se proporciona el límite
+		simulator.model.PopulationObserver popObserver = null;
+		if (limite != null) {
+			popObserver = new simulator.model.PopulationObserver(limite);
+			ctrl.addObserver(popObserver);
+		}
+
 		// 3) Cargamos los datos (animales y regiones)
 		ctrl.loadData(json);
 
 		// 4) Configuramos la salida (consola o fichero)
 		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
-
+		
 		// 5) Ejecutamos el bucle de simulación en el controlador
 		ctrl.run(time, deltaTime, simpleViewer, out);
 
 		if (out != System.out) {
 			out.close();
+		}
+
+		// Pregunta 2: Imprimir el informe al final de la simulación
+		if (popObserver != null) {
+			popObserver.printReport();
 		}
 	}
 

@@ -6,12 +6,13 @@ import java.util.List;
 import simulator.misc.Utils;
 
 public class DryRegion extends Region {
-	protected double R1;
-	protected double R2;
-	protected double N;
-	protected double M;
-	double cont;
-	double tiempoSequia;
+	private double R1;
+	private double R2;
+	private double N;
+	private double M;
+	private double cont;
+	private double tiempoSequia;
+	private boolean enSequía;
 
 	public DryRegion(double R1, double R2, double N, double M) {
 		if((R1 < 0 || R1 > 1 )|| ( R2 < 0 || R2 > 1) || N < 0 || M < 0) {
@@ -23,31 +24,42 @@ public class DryRegion extends Region {
 		this.M = M;
 		this.cont = 0;
 		this.tiempoSequia = Utils.RAND.nextDouble(1, M);
+		this.enSequía = false;
 	}
 
 	@Override
 	public double getFood(AnimalInfo a, double dt) {
-		if(cont < N) {
-			if(a.getDiet() == Diet.HERBIVORE) {
-				return 60.0 * Math.exp(-Math.max(0, this.nH - 5.0) * 2.0) * dt;
+		if((a.getDiet() == Diet.HERBIVORE)) {
+			double food =  60.0 * Math.exp(-Math.max(0, this.nH - 5.0) * 2.0) * dt;
+			if(enSequía) {
+				return food * R1;
+			}
+			else {
+				return food;
 			}
 		}
-		else {
-			
-			return R1 * 60.0 * Math.exp(-Math.max(0, this.nH - 5.0) * 2.0) * dt;
-		}
-		return 0.0;
+		else return 0.0;
 	}
 
 	@Override
 	public void update(double dt) {
 		this.cont += dt;
-		if(cont < N) {
+		
+		if(!enSequía) {
+			System.out.println("Region no en sequia, R1 : " + R1 +  ",,  Con tiempo: " + cont);
+			if(cont >= N) enSequía = true; 
+		}
+		else {
 			if(cont - N > tiempoSequia) {
 				R1 *= R2;
 				cont = 0;
+				enSequía = false;
+				this.tiempoSequia = Utils.RAND.nextDouble(1, M);
 			}
+			System.out.println("Region en sequia, R1 : "+ R1);
 		}
+		
+		
 	}
 
 	@Override
