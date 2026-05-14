@@ -5,6 +5,7 @@ public class DefaultRegion extends Region {
 	@Override
 	public double getFood(AnimalInfo a, double dt) {
 		if (a.getDiet() == Diet.HERBIVORE)
+			// La comida disminuye exponencialmente si hay más de 5 herbívoros (competencia por recursos)
 			return 60.0 * Math.exp(-Math.max(0, this.nH - 5.0) * 2.0) * dt;
 		else
 			return 0.0;

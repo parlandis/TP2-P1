@@ -22,6 +22,7 @@ import simulator.control.Controller;
 import simulator.factories.Builder;
 import simulator.factories.BuilderBasedFactory;
 import simulator.factories.DefaultRegionBuilder;
+import simulator.factories.DryRegionBuilder;
 import simulator.factories.DynamicSupplyRegionBuilder;
 import simulator.factories.Factory;
 import simulator.factories.SelectClosestBuilder;
@@ -239,6 +240,7 @@ public class Main {
 		List<Builder<Region>> regionsBuilder = new ArrayList<>();
 		regionsBuilder.add(new DefaultRegionBuilder());
 		regionsBuilder.add(new DynamicSupplyRegionBuilder());
+		regionsBuilder.add(new DryRegionBuilder());
 		_regionFactory = new BuilderBasedFactory<Region>(regionsBuilder);
 
 	}
