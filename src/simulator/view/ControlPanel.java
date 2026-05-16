@@ -18,6 +18,7 @@ class ControlPanel extends JPanel {
 
 	private Controller ctrl;
 	private ChangeRegionsDialog changeRegionsDialog;
+	private preg3Dialog dialogoP3;
 
 	private JToolBar toolaBar;
 
@@ -28,6 +29,10 @@ class ControlPanel extends JPanel {
 	private JSpinner steps; // Boton de flechas para subir o bajar el numero de pasos
 	private JTextField dt; // Para poder poner el valor de dt
 	private JFileChooser fc; // Es el explorador de archivos
+	
+	//para pregunta 3
+	private JButton preg3;
+	
 	
 	private JSpinner nuevo; // JSPinner para practica 3
 
@@ -54,6 +59,7 @@ class ControlPanel extends JPanel {
 
 		// inicializamos ChangeRegionsDialog
 		this.changeRegionsDialog = new ChangeRegionsDialog(this.ctrl);
+		this.dialogoP3 = new preg3Dialog(this.ctrl);
 
 		// Botón Open
 		this.openButton = new JButton();
@@ -79,7 +85,14 @@ class ControlPanel extends JPanel {
 		this.toolaBar.add(regionsButton);
 
 		this.toolaBar.addSeparator();
-
+		
+		//botonm preg3
+		this.preg3 = new JButton();
+		this.preg3.setToolTipText("Preg3");
+		this.preg3.setIcon(new ImageIcon("resources/icons/regions.png"));
+		this.preg3.addActionListener((e) -> this.dialogoP3.open(ViewUtils.getWindow(this)));  
+		this.toolaBar.add(preg3);
+		
 		// Botón Run
 		this.runButton = new JButton();
 		this.runButton.setToolTipText("Run");

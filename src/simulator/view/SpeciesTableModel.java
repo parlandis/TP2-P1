@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import simulator.control.Controller;
@@ -27,27 +28,34 @@ class SpeciesTableModel extends AbstractTableModel implements EcoSysObserver {
 	}
 
 	private void update(List<AnimalInfo> animals) {
-		species.clear();
-		data.clear();
+	    // 1. Creamos una copia de la lista JUSTO AQUÍ (en el hilo del simulador)
+	    List<AnimalInfo> animalsCopy = new ArrayList<>(animals);
 
-		for (AnimalInfo a : animals) {
-			String g = a.getGeneticCode();
-			if (!data.containsKey(g)) {
-				species.add(g);
-				Map<State, Integer> statesCount = new HashMap<>();
-				// Inicializar todos los estados posibles a 0 dinámicamente
-				for (State s : State.values()) {
-					statesCount.put(s, 0);
-				}
-				data.put(g, statesCount);
-			}
-			Map<State, Integer> counts = data.get(g);
-			counts.put(a.getState(), counts.get(a.getState()) + 1);
-		}
+	    // 2. Le pasamos la COPIA a Swing
+	    SwingUtilities.invokeLater(() -> {
+	        species.clear();
+	        data.clear();
 
-		Collections.sort(species); // Ordenar alfabéticamente las especies
-		fireTableDataChanged(); // Notificar a la tabla que los datos han cambiado para que se actualice la vista
+	        for (AnimalInfo a : animalsCopy) { // <--- Usamos la copia
+	            String g = a.getGeneticCode();
+	            if (!data.containsKey(g)) {
+	                species.add(g);
+	                Map<State, Integer> statesCount = new HashMap<>();
+	                for (State s : State.values()) {
+	                    statesCount.put(s, 0);
+	                }
+	                data.put(g, statesCount);
+	            }
+	            Map<State, Integer> counts = data.get(g);
+	            counts.put(a.getState(), counts.get(a.getState()) + 1);
+	        }
+
+	        Collections.sort(species);
+	        fireTableDataChanged();
+	    });
 	}
+
+
 
 	@Override
 	public int getRowCount() {

@@ -24,6 +24,7 @@ import simulator.factories.BuilderBasedFactory;
 import simulator.factories.DefaultRegionBuilder;
 import simulator.factories.DynamicSupplyRegionBuilder;
 import simulator.factories.Factory;
+import simulator.factories.FloodRegionBuilder;
 import simulator.factories.SelectClosestBuilder;
 import simulator.factories.SelectFirstBuilder;
 import simulator.factories.SheepBuilder;
@@ -31,6 +32,7 @@ import simulator.factories.SelectYoungestBuilder;
 import simulator.factories.WolfBuilder;
 import simulator.misc.Utils;
 import simulator.model.Animal;
+import simulator.model.DecliveObs;
 import simulator.model.Region;
 import simulator.model.SelectionStrategy;
 import simulator.model.Simulator;
@@ -69,6 +71,7 @@ public class Main {
 	private static String inFile = null;
 	private static String outFile = null;
 	private static boolean simpleViewer = false;
+	public static boolean declive = false;
 	private static ExecMode mode = ExecMode.GUI;
 	private static Long seed = null;
 	public static Factory<Animal> _animalFactory;
@@ -87,6 +90,7 @@ public class Main {
 		try {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
+			parseDcOption(line);
 			parseModeOption(line);
 			parseInFileOption(line);
 			parseOutFileOption(line);
@@ -118,7 +122,8 @@ public class Main {
 
 		// help
 		cmdLineOptions.addOption(Option.builder("h").longOpt("help").desc("Print this message.").build());
-
+		
+		cmdLineOptions.addOption(Option.builder("dc").longOpt("dc").build());
 		// input file
 		cmdLineOptions.addOption(Option.builder("i").longOpt("input").hasArg().desc("A configuration file.").build());
 
@@ -161,6 +166,12 @@ public class Main {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp(Main.class.getCanonicalName(), cmdLineOptions, true);
 			System.exit(0);
+		}
+	}
+	
+	private static void parseDcOption(CommandLine line) {
+		if(line.hasOption("dc")) {
+			declive = true;
 		}
 	}
 
@@ -236,6 +247,7 @@ public class Main {
 		List<Builder<Region>> regionsBuilder = new ArrayList<>();
 		regionsBuilder.add(new DefaultRegionBuilder());
 		regionsBuilder.add(new DynamicSupplyRegionBuilder());
+		regionsBuilder.add(new FloodRegionBuilder());
 		_regionFactory = new BuilderBasedFactory<Region>(regionsBuilder);
 
 	}
@@ -259,14 +271,25 @@ public class Main {
 		// Instanciamos el simulador, el controlador y ejecutamos la simulación
 		Simulator sim = new Simulator(cols, rows, width, height, _animalFactory, _regionFactory);
 		Controller ctrl = new Controller(sim);
+		
+		//Inicializacion del Observer 
+		DecliveObs obs = null;
+		if(declive) {
+			obs = new DecliveObs(ctrl);
+		}
 
 		// Cargamos los datos del Json al controlador
 		ctrl.loadData(json);
 
 		// Configuramos donde se va a escribir la salida de la simulación
 		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
-
+		
+		
+		
 		ctrl.run(time, deltaTime, simpleViewer, out);
+	    if (declive && obs != null) {
+	        obs.printReport();
+	    }
 
 		if (out != System.out) {
 			out.close();
