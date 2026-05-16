@@ -24,6 +24,7 @@ import simulator.factories.BuilderBasedFactory;
 import simulator.factories.DefaultRegionBuilder;
 import simulator.factories.DynamicSupplyRegionBuilder;
 import simulator.factories.Factory;
+import simulator.factories.LimitedRegionBuilder;
 import simulator.factories.SelectClosestBuilder;
 import simulator.factories.SelectFirstBuilder;
 import simulator.factories.SheepBuilder;
@@ -69,6 +70,7 @@ public class Main {
 	private static String inFile = null;
 	private static String outFile = null;
 	private static boolean simpleViewer = false;
+	private static boolean estable = false;
 	private static ExecMode mode = ExecMode.GUI;
 	private static Long seed = null;
 	public static Factory<Animal> _animalFactory;
@@ -87,6 +89,7 @@ public class Main {
 		try {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
+			parseEstableOption(line);
 			parseModeOption(line);
 			parseInFileOption(line);
 			parseOutFileOption(line);
@@ -118,7 +121,10 @@ public class Main {
 
 		// help
 		cmdLineOptions.addOption(Option.builder("h").longOpt("help").desc("Print this message.").build());
-
+		
+		//Establle 
+		cmdLineOptions.addOption(Option.builder("es").longOpt("estable").desc("Estable region y especie").build());
+		
 		// input file
 		cmdLineOptions.addOption(Option.builder("i").longOpt("input").hasArg().desc("A configuration file.").build());
 
@@ -163,6 +169,12 @@ public class Main {
 			System.exit(0);
 		}
 	}
+	
+	private static void parseEstableOption(CommandLine line) {
+		if(line.hasOption("es")) {
+			estable = true;
+		}
+	}
 
 	private static void parseInFileOption(CommandLine line) throws ParseException {
 		inFile = line.getOptionValue("i");
@@ -170,7 +182,7 @@ public class Main {
 			throw new ParseException("In batch mode an input configuration file is required");
 		}
 	}
-
+	
 	private static void parseTimeOption(CommandLine line) throws ParseException {
 		String t = line.getOptionValue("t", DEFAULT_TIME.toString());
 		try {
@@ -236,6 +248,7 @@ public class Main {
 		List<Builder<Region>> regionsBuilder = new ArrayList<>();
 		regionsBuilder.add(new DefaultRegionBuilder());
 		regionsBuilder.add(new DynamicSupplyRegionBuilder());
+		regionsBuilder.add(new LimitedRegionBuilder());
 		_regionFactory = new BuilderBasedFactory<Region>(regionsBuilder);
 
 	}

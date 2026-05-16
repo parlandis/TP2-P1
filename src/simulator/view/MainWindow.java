@@ -39,6 +39,10 @@ public class MainWindow extends JFrame {
 		InfoTable regionsTable = new InfoTable("Regions", new RegionsTableModel(ctrl));
 		regionsTable.setPreferredSize(new Dimension(500, 250));
 		contentPanel.add(regionsTable);
+		
+		InfoTable pasosTable = new InfoTable("Region/State info", new PasosTableModel(ctrl));
+		pasosTable.setPreferredSize(new Dimension(500, 250));
+		contentPanel.add(pasosTable);
 
 		// Window listener
 		addWindowListener(new java.awt.event.WindowAdapter() { // para controlar el cierre de la ventana
