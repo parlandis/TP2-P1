@@ -35,6 +35,7 @@ import simulator.model.Animal;
 import simulator.model.Region;
 import simulator.model.SelectionStrategy;
 import simulator.model.Simulator;
+import simulator.view.PasoObs;
 
 public class Main {
 
@@ -272,9 +273,15 @@ public class Main {
 		// Instanciamos el simulador, el controlador y ejecutamos la simulación
 		Simulator sim = new Simulator(cols, rows, width, height, _animalFactory, _regionFactory);
 		Controller ctrl = new Controller(sim);
+		
+		PasoObs obs = null;
 
 		// Cargamos los datos del Json al controlador
 		ctrl.loadData(json);
+		
+		if(estable) {
+			obs = new PasoObs();
+		}
 
 		// Configuramos donde se va a escribir la salida de la simulación
 		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
