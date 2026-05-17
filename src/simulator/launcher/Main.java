@@ -31,6 +31,7 @@ import simulator.factories.SelectYoungestBuilder;
 import simulator.factories.WolfBuilder;
 import simulator.misc.Utils;
 import simulator.model.Animal;
+import simulator.model.PopObs;
 import simulator.model.Region;
 import simulator.model.SelectionStrategy;
 import simulator.model.Simulator;
@@ -68,6 +69,7 @@ public class Main {
 	public static Double deltaTime = null;
 	private static String inFile = null;
 	private static String outFile = null;
+	private static boolean stable = false;
 	private static boolean simpleViewer = false;
 	private static ExecMode mode = ExecMode.GUI;
 	private static Long seed = null;
@@ -87,6 +89,7 @@ public class Main {
 		try {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
+			parseEstableOption(line);
 			parseModeOption(line);
 			parseInFileOption(line);
 			parseOutFileOption(line);
@@ -118,6 +121,9 @@ public class Main {
 
 		// help
 		cmdLineOptions.addOption(Option.builder("h").longOpt("help").desc("Print this message.").build());
+
+		//Estabilidad
+		cmdLineOptions.addOption(Option.builder("rp").longOpt("estabilidad").desc("estabilidad").build());
 
 		// input file
 		cmdLineOptions.addOption(Option.builder("i").longOpt("input").hasArg().desc("A configuration file.").build());
@@ -161,6 +167,11 @@ public class Main {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp(Main.class.getCanonicalName(), cmdLineOptions, true);
 			System.exit(0);
+		}
+	}
+	private static void parseEstableOption(CommandLine line ) {
+		if(line.hasOption("rp")) {
+			stable = true;
 		}
 	}
 
@@ -262,11 +273,21 @@ public class Main {
 
 		// Cargamos los datos del Json al controlador
 		ctrl.loadData(json);
+		
+		PopObs obs = null;
+		if(stable) {
+			obs = new PopObs(ctrl);
+		}
+		
 
 		// Configuramos donde se va a escribir la salida de la simulación
 		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
 
 		ctrl.run(time, deltaTime, simpleViewer, out);
+		
+		if(obs != null) {
+			obs.write();
+		}
 
 		if (out != System.out) {
 			out.close();
