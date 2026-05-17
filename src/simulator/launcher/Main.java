@@ -27,10 +27,12 @@ import simulator.factories.Factory;
 import simulator.factories.SelectClosestBuilder;
 import simulator.factories.SelectFirstBuilder;
 import simulator.factories.SheepBuilder;
+import simulator.factories.TiredSightSheepBuilder;
 import simulator.factories.SelectYoungestBuilder;
 import simulator.factories.WolfBuilder;
 import simulator.misc.Utils;
 import simulator.model.Animal;
+import simulator.model.PopObserver;
 import simulator.model.Region;
 import simulator.model.SelectionStrategy;
 import simulator.model.Simulator;
@@ -66,6 +68,7 @@ public class Main {
 	//
 	private static Double time = null;
 	public static Double deltaTime = null;
+	private static boolean estable = false;
 	private static String inFile = null;
 	private static String outFile = null;
 	private static boolean simpleViewer = false;
@@ -87,6 +90,7 @@ public class Main {
 		try {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
+			parseEstableOption(line);
 			parseModeOption(line);
 			parseInFileOption(line);
 			parseOutFileOption(line);
@@ -118,7 +122,10 @@ public class Main {
 
 		// help
 		cmdLineOptions.addOption(Option.builder("h").longOpt("help").desc("Print this message.").build());
-
+		
+		//Estable
+		cmdLineOptions.addOption(Option.builder("rp").longOpt("estable").desc("Estable").build());
+		
 		// input file
 		cmdLineOptions.addOption(Option.builder("i").longOpt("input").hasArg().desc("A configuration file.").build());
 
@@ -169,6 +176,10 @@ public class Main {
 		if (mode == ExecMode.BATCH && inFile == null) {
 			throw new ParseException("In batch mode an input configuration file is required");
 		}
+	}
+	
+	private static void parseEstableOption(CommandLine line) {
+		if(line .hasOption("rp")) estable = true;
 	}
 
 	private static void parseTimeOption(CommandLine line) throws ParseException {
@@ -231,6 +242,7 @@ public class Main {
 		List<Builder<Animal>> animalsBuilders = new ArrayList<>();
 		animalsBuilders.add(new SheepBuilder(_strategyFactory));
 		animalsBuilders.add(new WolfBuilder(_strategyFactory));
+		animalsBuilders.add(new TiredSightSheepBuilder(_strategyFactory));
 		_animalFactory = new BuilderBasedFactory<Animal>(animalsBuilders);
 
 		List<Builder<Region>> regionsBuilder = new ArrayList<>();
@@ -262,11 +274,21 @@ public class Main {
 
 		// Cargamos los datos del Json al controlador
 		ctrl.loadData(json);
+		
+		//Declaramos el observer por si lo usamos 
+		PopObserver obs = null;
+		if(estable) {
+			obs = new PopObserver(ctrl);
+		}
 
 		// Configuramos donde se va a escribir la salida de la simulación
 		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
 
 		ctrl.run(time, deltaTime, simpleViewer, out);
+		
+		if(estable) {
+			obs.write();
+		}
 
 		if (out != System.out) {
 			out.close();

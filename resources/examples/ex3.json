@@ -15,10 +15,14 @@
       }
     }
   }, {
-    "amount" : 40,
+    "amount" : 2,
     "spec" : {
-      "type" : "sheep",
+      "type" : "ts_sheep",
       "data" : {
+		"d" : 1.0,  
+		      "n" : 1.0,  
+		      "rd" : 0.98,  
+		      "rn" : 0.5,  
         "pos" : {
           "x_range" : [ 600.0, 700.0 ],
           "y_range" : [ 100.0, 200.0 ]

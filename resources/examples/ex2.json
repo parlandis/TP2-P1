@@ -9,7 +9,24 @@
       "type" : "sheep",
       "data" : { }
     }
-  }, {
+  }, 	{ 	"amount" : 100,
+	    "spec" : {
+	 "type": "ts_sheep", 
+	 "data": { 
+	      "d" : 1.0,  
+	      "n" : 1.0,  
+	      "rd" : 0.98,  
+	      "rn" : 0.5,  
+
+	"pos" : { 
+	    "x_range" : [ 100.0, 200.0 ], 
+	    "y_range" : [ 100.0, 200.0 ] 
+	} 
+	 } 
+	}, 
+  
+  
+  {
     "amount" : 30,
     "spec" : {
       "type" : "wolf",

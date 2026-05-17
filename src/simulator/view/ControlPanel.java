@@ -18,6 +18,7 @@ class ControlPanel extends JPanel {
 
 	private Controller ctrl;
 	private ChangeRegionsDialog changeRegionsDialog;
+	private ExtincionDialog extincionDialog;
 
 	private JToolBar toolaBar;
 
@@ -32,6 +33,8 @@ class ControlPanel extends JPanel {
 	private JButton mapButton; // Boton del mapa
 	private JButton runButton; // Boton de run
 	private JButton stopButton; // Boton de stop
+	
+	private JButton extincionButton;
 
 	private boolean stopped = true; // utilizado en los botones de run/stop
 
@@ -51,6 +54,7 @@ class ControlPanel extends JPanel {
 
 		// inicializamos ChangeRegionsDialog
 		this.changeRegionsDialog = new ChangeRegionsDialog(this.ctrl);
+		this.extincionDialog = new ExtincionDialog(this.ctrl);
 
 		// Botón Open
 		this.openButton = new JButton();
@@ -76,7 +80,14 @@ class ControlPanel extends JPanel {
 		this.toolaBar.add(regionsButton);
 
 		this.toolaBar.addSeparator();
-
+		
+		//Boton Extincion
+		this.extincionButton = new JButton();
+		this.extincionButton.setToolTipText("Extincion");
+		this.extincionButton.setIcon(new ImageIcon("resources/icons/regions.png"));
+		this.extincionButton.addActionListener((e) -> this.extincionDialog.open(ViewUtils.getWindow(this)));
+		this.toolaBar.add(extincionButton);
+		
 		// Botón Run
 		this.runButton = new JButton();
 		this.runButton.setToolTipText("Run");
