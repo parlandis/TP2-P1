@@ -31,6 +31,7 @@ import simulator.factories.SelectYoungestBuilder;
 import simulator.factories.WolfBuilder;
 import simulator.misc.Utils;
 import simulator.model.Animal;
+import simulator.model.PopObs;
 import simulator.model.Region;
 import simulator.model.SelectionStrategy;
 import simulator.model.Simulator;
@@ -61,6 +62,7 @@ public class Main {
 	//
 	private final static Double DEFAULT_TIME = 10.0; // in seconds
 	private final static Double DEFAULT_DELTA_TIME = 0.03; // in seconds
+	private final static Double DEFAULT_POP_CHANGE = 0.00; // in seconds
 
 	// some attributes to stores values corresponding to command-line parameters
 	//
@@ -68,6 +70,7 @@ public class Main {
 	public static Double deltaTime = null;
 	private static String inFile = null;
 	private static String outFile = null;
+	public static Double popChange = null;
 	private static boolean simpleViewer = false;
 	private static ExecMode mode = ExecMode.GUI;
 	private static Long seed = null;
@@ -88,6 +91,7 @@ public class Main {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
 			parseModeOption(line);
+			parseChangeOption(line);
 			parseInFileOption(line);
 			parseOutFileOption(line);
 			parseTimeOption(line);
@@ -122,6 +126,10 @@ public class Main {
 		// input file
 		cmdLineOptions.addOption(Option.builder("i").longOpt("input").hasArg().desc("A configuration file.").build());
 
+		// Pop change 
+		cmdLineOptions.addOption(Option.builder("ps").longOpt("changePop").hasArg().desc("Change population count").build());
+		
+		
 		// steps
 		cmdLineOptions.addOption(Option.builder("t").longOpt("time").hasArg()
 				.desc("An real number representing the total simulation time in seconds. Default value: "
@@ -168,6 +176,19 @@ public class Main {
 		inFile = line.getOptionValue("i");
 		if (mode == ExecMode.BATCH && inFile == null) {
 			throw new ParseException("In batch mode an input configuration file is required");
+		}
+	}
+	
+	private static void parseChangeOption(CommandLine line) throws ParseException {
+		if(line.hasOption("ps")){
+			String change = line.getOptionValue("ps");
+			
+			try {
+				popChange = Double.parseDouble(change);
+				assert(popChange > 0);
+			}catch (Exception e) {
+				throw new ParseException("Invalid value for popChange");
+			}
 		}
 	}
 
@@ -262,11 +283,20 @@ public class Main {
 
 		// Cargamos los datos del Json al controlador
 		ctrl.loadData(json);
+		
+		PopObs obs = null;
+		if(popChange != null) {
+			obs = new PopObs(ctrl);
+		}
 
 		// Configuramos donde se va a escribir la salida de la simulación
 		OutputStream out = outFile == null ? System.out : new FileOutputStream(new File(outFile));
 
 		ctrl.run(time, deltaTime, simpleViewer, out);
+		
+		if(obs != null) {
+			obs.write();
+		}
 
 		if (out != System.out) {
 			out.close();

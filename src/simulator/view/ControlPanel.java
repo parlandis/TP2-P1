@@ -18,6 +18,7 @@ class ControlPanel extends JPanel {
 
 	private Controller ctrl;
 	private ChangeRegionsDialog changeRegionsDialog;
+	private AgeDialog ageDialog;
 
 	private JToolBar toolaBar;
 
@@ -28,6 +29,7 @@ class ControlPanel extends JPanel {
 	private JSpinner steps; // Boton de flechas para subir o bajar el numero de pasos
 	private JTextField dt; // Para poder poner el valor de dt
 	private JFileChooser fc; // Es el explorador de archivos
+	private JButton ageButton; // Boton para abrir ageDialog
 
 	private JButton mapButton; // Boton del mapa
 	private JButton runButton; // Boton de run
@@ -51,6 +53,7 @@ class ControlPanel extends JPanel {
 
 		// inicializamos ChangeRegionsDialog
 		this.changeRegionsDialog = new ChangeRegionsDialog(this.ctrl);
+		this.ageDialog = new AgeDialog(ctrl);
 
 		// Botón Open
 		this.openButton = new JButton();
@@ -77,6 +80,13 @@ class ControlPanel extends JPanel {
 
 		this.toolaBar.addSeparator();
 
+		// Boton ageDialgog
+		this.ageButton = new JButton();
+		this.ageButton.setToolTipText("Abrir age Dialog");
+		this.ageButton.setIcon(new ImageIcon("resources/icons/viewer.png"));
+		this.ageButton.addActionListener((e) -> this.ageDialog.open(ViewUtils.getWindow(this)));
+		this.toolaBar.add(ageButton);
+
 		// Botón Run
 		this.runButton = new JButton();
 		this.runButton.setToolTipText("Run");
@@ -95,7 +105,8 @@ class ControlPanel extends JPanel {
 
 		// Pasos (Steps)
 		this.toolaBar.add(new JLabel(" Steps: "));
-		this.steps = new JSpinner(new SpinnerNumberModel(10000, 1, 10000, 100)); // Marcamos valor ini, minimo, maximo y paso (incremento/decremento)
+		this.steps = new JSpinner(new SpinnerNumberModel(10000, 1, 10000, 100)); // Marcamos valor ini, minimo, maximo y
+																					// paso (incremento/decremento)
 		this.steps.setToolTipText("Simulation steps to run: 1 - 10000");
 		this.steps.setMinimumSize(new Dimension(80, 30));
 		this.steps.setPreferredSize(new Dimension(80, 30));
@@ -104,7 +115,9 @@ class ControlPanel extends JPanel {
 
 		// Delta-Time
 		this.toolaBar.add(new JLabel(" Delta-Time: "));
-		this.dt = new JTextField(Main.deltaTime != null ? Main.deltaTime.toString() : "0.03"); // Si Main.deltaTime es// null, se pone 0.03 																							// por defecto
+		this.dt = new JTextField(Main.deltaTime != null ? Main.deltaTime.toString() : "0.03"); // Si Main.deltaTime es//
+																								// null, se pone 0.03 //
+																								// por defecto
 		this.dt.setToolTipText("Real time (in seconds) corresponding to a step");
 		this.dt.setMinimumSize(new Dimension(80, 30));
 		this.dt.setPreferredSize(new Dimension(80, 30));
@@ -117,7 +130,8 @@ class ControlPanel extends JPanel {
 		this.quitButton = new JButton();
 		this.quitButton.setToolTipText("Quit");
 		this.quitButton.setIcon(new ImageIcon("resources/icons/exit.png"));
-		this.quitButton.addActionListener((e) -> ViewUtils.quit(this)); // Cierra la ventana actual (y por tanto la aplicación, al ser la ventana principal)
+		this.quitButton.addActionListener((e) -> ViewUtils.quit(this)); // Cierra la ventana actual (y por tanto la
+																		// aplicación, al ser la ventana principal)
 		this.toolaBar.add(quitButton);
 	}
 
@@ -143,7 +157,8 @@ class ControlPanel extends JPanel {
 
 	private void startSim() {
 		this.stopped = false;
-		setButtonsEnabled(false); // Desactivamos los botones mientras se ejecuta la simulación (excepto el de stop)
+		setButtonsEnabled(false); // Desactivamos los botones mientras se ejecuta la simulación (excepto el de
+									// stop)
 		try {
 			int n = (Integer) this.steps.getValue();
 			double delta = Double.parseDouble(this.dt.getText());
@@ -170,7 +185,9 @@ class ControlPanel extends JPanel {
 		if (n > 0 && !this.stopped) {
 			try {
 				this.ctrl.advance(dt);
-				SwingUtilities.invokeLater(() -> runSim(n - 1, dt)); // Llamamos a runSim de nuevo con n-1 pasos, pero lo hacemos en el hilo de la interfaz gráfica para evitar bloquearla
+				SwingUtilities.invokeLater(() -> runSim(n - 1, dt)); // Llamamos a runSim de nuevo con n-1 pasos, pero
+																		// lo hacemos en el hilo de la interfaz gráfica
+																		// para evitar bloquearla
 			} catch (Exception e) {
 				ViewUtils.showErrorMsg(e.getMessage());
 				this.stopped = true;
